@@ -1,0 +1,77 @@
+<div class="h-100">
+    <div class="row h-100 flex-nowrap">
+        <!-- chat side menu -->
+        <div class="col-4 border bg-white h-100 " style=" min-width: 20em;">
+            <div>
+                <div class="row mb-1 bg-light">
+                    <app-chat-tool-bar></app-chat-tool-bar>
+                </div>
+                <div class="row mb-1 py-1 bg-light">
+                    <app-search-bar></app-search-bar>
+                </div>
+            </div>
+            
+
+            <!-- people -->
+            <div class="" style="height: 85%">
+                <div class="" style="height: 100%;  overflow-x: hidden; padding-right: -0.5em;">
+                    <div *ngFor="let member of peopleList" class="row">
+                        <app-chat-people
+                            [name]= "member.nickName"
+                            [dp]= "member.dp"
+                            (onSelect)= "onConvSelect($event)"
+                        ></app-chat-people>
+                    </div>
+                </div>
+            </div>     
+        </div>
+
+        <!--  -->
+        <div class="col-8 border bg-white h-100 ps-0" >
+            <div class="row h-100 flex-nowrap">
+                <div class="col h-100" style="position: relative;">
+                    <div style="height: 100%; padding-bottom: 4.5em;">
+                        <div class="row border-start border-end bg-light ">
+                            <app-chat-box-top-bar></app-chat-box-top-bar>
+                        </div>
+                        <div [ngClass]="{'row border px-5': true, 'scroll-end': defaultScrollDown}" style="height: 94%; overflow-y: scroll; background-color: azure;" (scroll)="scrollHandler($event)">
+                            <app-messagelet *ngFor="let message of messages"
+                                [text]="message.text"
+                                [from]="message.from"
+                                [time]="message.timestamp"
+                            ></app-messagelet>
+                        </div>
+                    </div>
+                    
+                    <div style="width: 100%; position: absolute; bottom: 0; right: 0;">
+                        <app-chat-box-bot-bar></app-chat-box-bot-bar>
+                    </div>
+                </div>
+                <div class="col-5 collapse p-0" id="searchChat">
+                    <div class="row m-0 mb-1 bg-light w-100">
+                        <div class="row py-2">
+                            <div class="col-4">
+                                <button class="btn" data-bs-toggle="collapse" data-bs-target="#searchChat" attr.aria-controls='searchChat'>
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                            <div class="col">
+                                Search Messages
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row m-0 mb-1 py-1 bg-light w-100">
+                        <app-search-bar></app-search-bar>
+                    </div>
+
+                </div>
+
+            </div>
+
+            
+        </div>
+
+    </div>
+    
+      
+  </div>
