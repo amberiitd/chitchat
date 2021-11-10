@@ -1,4 +1,5 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { formatTime } from 'src/app/util/util-method';
 
 @Component({
   selector: 'app-messagelet',
@@ -7,13 +8,18 @@ import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/cor
 })
 export class MessageletComponent implements OnInit, OnChanges {
   @Input()
-  public text: string;
+  public text: string="";
 
   @Input()
-  public time: string;
+  public timestamp: number= 0;
 
   @Input()
-  public from: string;
+  public from: string ="";
+
+  @Input()
+  public toRight= true;
+
+  public formattedTime: string ="00:00";
 
   public horizontalAlign = 'left';
 
@@ -24,8 +30,10 @@ export class MessageletComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    const from = changes['from'];
+    this.formattedTime = formatTime(changes['timestamp'].currentValue);
     
   }
 
 }
+ 
+

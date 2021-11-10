@@ -1,6 +1,6 @@
-<div class="input-group m-1 border border-info rounded-pill bg-white mx-auto">
+<div class="input-group m-1 border border-info rounded-pill bg-white mx-auto px-0 flex-nowrap">
     <button class="btn">
         <i class="bi bi-search"></i>
     </button>
-    <input class="form-control border-0 me-3 py-0" type="text" placeholder="Search or start new chat"/>
+    <input class="form-control border-0 me-3 py-0 text-nowrap" type="text" [placeholder]="placeholder" (ngModelChange) = "onChangeHandler($event)" [(ngModel)]="searchString" />
 </div>

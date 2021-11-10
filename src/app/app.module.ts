@@ -14,6 +14,7 @@ import { ChatBoxTopBarComponent } from './components/chat-box-top-bar/chat-box-t
 import { ChatBoxBotBarComponent } from './components/chat-box-bot-bar/chat-box-bot-bar.component';
 import { AuthService } from './service/auth.service';
 import { DataService } from './service/data.service';
+import { LoginPageComponent } from './components/login-page/login-page.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { DataService } from './service/data.service';
     SearchBarComponent,
     ChatPeopleComponent,
     ChatBoxTopBarComponent,
-    ChatBoxBotBarComponent
+    ChatBoxBotBarComponent,
+    LoginPageComponent
   ],
   imports: [
     BrowserModule,

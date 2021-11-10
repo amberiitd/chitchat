@@ -1,9 +1,13 @@
 <div class="row py-2">
     <div class="inline-block mx-2" style="width: 3em;">
-        <img class="border rounded-circle" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTB12CRxcmCAshHDbmp05IADKm4UonCDi3yEA&usqp=CAU" alt="dp" style="height: 2.5em; width: 2.5em;">
+        <div class="rounded-circle border border-info" style="width: 3em; height: 3em; overflow: hidden;">
+            <img   [src]="'data:image/jpeg;base64,'+ dp" alt="dp" style="width: 3em; height: 3.5em;"/>
+        </div>
     </div>
-    <div class="col ">
-        User Nickname
+    <div class="col m">
+        <h5 class="m-0 mt-2 p-0">
+            {{name}}
+        </h5>
     </div>
     <div class="col ">
         <div align="right">

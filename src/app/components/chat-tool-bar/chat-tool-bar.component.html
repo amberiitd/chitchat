@@ -1,10 +1,12 @@
-<div class="row py-2">
-    <div class="col">
-        <img class="border rounded-circle" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTB12CRxcmCAshHDbmp05IADKm4UonCDi3yEA&usqp=CAU" alt="dp" style="height: 2.5em; width: 2.5em;">
+<div class="row py-2 flex-nowrap">
+    <div class="inline-block mx-2" style="width: 3em;">
+        <div class="rounded-circle border border-info" style="width: 2.5em; height: 2.5em; overflow: hidden;" data-bs-toggle = "collapse" data-bs-target=".profile" attr.aria-controls="userProfile chatMenu">
+            <img   [src]="'data:image/jpeg;base64,'+ dp" alt="dp" style="width: 2.5em; height: 3em;"/>
+        </div>
     </div>
     <div class="col">
         <div align="right">
-            <button class="btn">
+            <button class="btn" data-bs-toggle = "collapse" data-bs-target=".contacts" attr.aria-controls="chatContacts chatMenu" (click)="toggleFirstColumn()">
                 <i class="bi bi-chat-text-fill"></i>
             </button>
             <button class="btn">

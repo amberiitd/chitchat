@@ -1,0 +1,9 @@
+<div class="">
+    <div class="text-center">
+        <h2>Please Login!</h2>
+        <input class="form-control mb-3" type="text" placeholder="username" [(ngModel)]="username"/>
+        <input class="form-control mb-3" type="password" placeholder="password" [(ngModel)]="password"/>
+        <button class="btn form-control btn-primary" (click)="submitLogin()">Login</button>
+        {{msg}}
+    </div>
+</div>

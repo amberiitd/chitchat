@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-chat-box-top-bar',
@@ -6,6 +6,15 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./chat-box-top-bar.component.css']
 })
 export class ChatBoxTopBarComponent implements OnInit {
+
+  @Input()
+  public id: string= "NullString";
+
+  @Input()
+  public name: string= "NullString";
+
+  @Input()
+  public dp: Blob = new Blob();
 
   constructor() { }
 

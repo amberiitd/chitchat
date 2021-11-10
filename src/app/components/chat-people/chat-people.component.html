@@ -1,26 +1,32 @@
-<div class="row py-1 px-3 ps-1" (click)= "onClickHandler()">
-    <div class="col-2 p-1 m-1">
+<div class="row py-2 border-bottom flex-nowrap" (click)= "onClickHandler()" style="">
+    <div class="inline-block m-1" style="width: 3.5em">
         <!-- <img class="rounded-circle border border-info" style="width: 3em; height: 3em;" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTB12CRxcmCAshHDbmp05IADKm4UonCDi3yEA&usqp=CAU" alt="dp" /> -->
         <div class="rounded-circle border border-info" style="width: 3em; height: 3em; overflow: hidden;">
             <img   [src]="'data:image/jpeg;base64,'+ dp" alt="dp" style="width: 3em; height: 3.5em;"/>
         </div>
     </div>
-    <div class="col p-1">
-        <div>
+    <div class="col-6 ">
+        <h6 class="m-0 mt-2 pb-0 cut-text">
             {{name}}
-        </div>
-        <div>
-            last message
+        </h6>
+        <p *ngIf="viewType === 'contact'" class="m-0 pb-0 cut-text" style="font-size: 90%;">
+            {{status}}
+        </p>
+        <div *ngIf="viewType === 'conv' && lastMessage" class="cut-text" >
+            <span style="font-size: 75%;">
+                <i *ngIf="lastMessage.from === authService.currentUser.publicUsername" class="bi bi-arrow-up"></i>
+                <i *ngIf="lastMessage.from !== authService.currentUser.publicUsername" class="bi bi-arrow-down"></i>
+            </span>
+            <span style="font-size: 90%;"> {{lastMessage.text}}</span>
         </div>
     </div>
-    <div class="col p-1">
-        <div align="right">
-            date/time
+    <div *ngIf="viewType === 'conv'" class="col p-1">
+        <div align="right" style="font-size: 75%;">
+            {{lastMsgtime}}
         </div>
         <div align="right">
             <i class="bi bi-volume-mute-fill me-2"></i>
-            <span class="badge rounded-pill bg-success">5</span>
+            <span *ngIf="unseenCount > 0" class="badge rounded-pill bg-success">{{unseenCount}}</span>
         </div>
     </div>
-    <hr class="m-0 ms-3 p-0" />
 </div>

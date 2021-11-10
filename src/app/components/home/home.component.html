@@ -1,77 +1,196 @@
-<div class="h-100">
-    <div class="row h-100 flex-nowrap">
-        <!-- chat side menu -->
-        <div class="col-4 border bg-white h-100 " style=" min-width: 20em;">
-            <div>
-                <div class="row mb-1 bg-light">
-                    <app-chat-tool-bar></app-chat-tool-bar>
-                </div>
-                <div class="row mb-1 py-1 bg-light">
-                    <app-search-bar></app-search-bar>
-                </div>
-            </div>
-            
+<div  class="h-100">
+    <div *ngIf="authService.isAuthenticated" class="row h-100 flex-nowrap shadow" style="overflow-x: auto;">
+ 
+        <!-- chat contacts  -->
+        <div class="col-4 border  bg-white h-100 px-0" style="position: relative;">
+            <div class="row m-0 p-0 h-100 justify-content-between">
+                <!-- profile -->
+                <div class="profile collapse collapse-horizontal text-nowrap p-0 bg-light h-100" 
+                    id = "userProfile"
+                    style="min-width: 0%;">
+                    <div class="row align-items-end mb-1 mx-0" style="height: 5.9em; background-color: #b0f7f7;">
+                        <div class="col">
+                            <button class="btn" data-bs-toggle = "collapse" data-bs-target=".profile" attr.aria-controls="userProfile chatMenu" aria-expanded="false">
+                                <i class="bi bi-arrow-left"></i>
+                            </button>
+                            Profile
+                        </div>
+                    </div>
 
-            <!-- people -->
-            <div class="" style="height: 85%">
-                <div class="" style="height: 100%;  overflow-x: hidden; padding-right: -0.5em;">
-                    <div *ngFor="let member of peopleList" class="row">
-                        <app-chat-people
-                            [name]= "member.nickName"
-                            [dp]= "member.dp"
-                            (onSelect)= "onConvSelect($event)"
-                        ></app-chat-people>
+                    <div class="row p-2 w-100 mb-1" style="overflow: hidden">
+                        <div class="col-auto mx-auto border rounded-circle" style="width: 12em; height: 12em; overflow: hidden;">
+                            <img [src]="'data:image/jpeg;base64,'+ currentUser.dp" alt="image" style="width: 10em; height: 13em;">
+                        </div>
+                    </div >
+
+                    <div class="p-2 w-100 mb-1 bg-white shadow-sm">
+                        <p class="text-info ms-3">Your Name</p>
+                        <input class="form-control border-0" type="text" placeholder="" [(ngModel)]="currentUser.firstName"/>
+                    </div>
+
+                    <div class="p-2 w-100 mb-1 bg-white shadow-sm">
+                        <p class="text-info ms-3">About</p>
+                        <input class="form-control border-0" type="text" placeholder="About yourself" />
                     </div>
                 </div>
-            </div>     
+                
+                <!-- contacts -->
+                <div class="contacts collapse collapse-horizontal text-nowrap p-0" 
+                    id = "chatContacts"
+                    style="min-width: 0%;">
+                    <div class="row align-items-end mb-1 mx-0" style="height: 5.9em; background-color: #b0f7f7;">
+                        <div class="col">
+                            <button class="btn" data-bs-toggle = "collapse" data-bs-target=".contacts" attr.aria-controls="chatContacts chatMenu" aria-expanded="false">
+                                <i class="bi bi-arrow-left"></i>
+                            </button>
+                            New Chat
+                        </div>
+                    </div>
+
+                    <div class="row mb-1 bg-light mx-0">
+                        <app-search-bar class=""
+                            [placeholder] ="'Search contacts'"
+                            (onTextChange) = "onContactSearch($event)"
+                        ></app-search-bar>
+                    </div>
+
+                    <div class="" style="height: 85%">
+                        <div class="" style="height: 100%;  overflow-x: hidden; padding-right: -0.5em;">
+                            <div *ngFor="let member of searchedContacts" class="row mx-0 pe-2" [ngStyle]="{'background-color': member.style?member.style.bg: 'inherit'}">
+                                <app-chat-people
+                                    [id]= "member.publicUsername"
+                                    [name]= "member.nickName"
+                                    [dp]= "member.dp"
+                                    [viewType]= "'contact'"
+                                    [status]="member.status"
+                                    (onSelect)= "onContactSelect($event)"
+                                ></app-chat-people>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- chat side menu -->
+                <div *ngIf="firstColumn === 'conv'" class="contacts profile collapse collapse-horizontal show border-end text-nowrap p-0" id="chatMenu" style="min-width: 0%;">
+                        <div class="">
+                            <div class="row mb-1 bg-light mx-0 py-1">
+                                <app-chat-tool-bar
+                                    [dp] = "currentUser.dp"
+                                    (showContacts)="toggleFirstColumn($event)"
+                                ></app-chat-tool-bar>
+                            </div>
+                            <div *ngIf="connectionStatus !== 'connected'" class="row d-flex justify-content-center mb-1 bg-warning mx-0 py-auto" style="height: 4.5em;">
+                                <div class="col pt-3 text-center">
+                                    Connection is lost 
+                                    <div class="btn rounded-pill bg-light" (click)= "refreshConnection()">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-1 bg-light mx-0">
+                                <app-search-bar class=""
+                                [placeholder] ="'Search new chat'"
+                                ></app-search-bar>
+                            </div>
+                            <!-- <div *ngIf="connectionStatus === 'connected'" class="row mb-1 bg-light mx-0 text-center py-auto">
+                                <button class="btn" (click)= "disconnect()">
+                                    Disconnect
+                                </button>
+                            </div> -->
+                        </div>
+                    
+                        <!-- people -->
+                        <div class="" style="height: 85%">
+                            <div class="" style="height: 100%;  overflow-x: hidden; padding-right: -0.5em;">
+                                <div *ngFor="let member of peopleList" class="row mx-0 pe-2" [ngStyle]="{'background-color': member.style?member.style.bg: 'inherit'}">
+                                    <app-chat-people
+                                        [id]= "member.publicUsername"
+                                        [name]= "member.nickName"
+                                        [dp]= "member.dp"
+                                        [unseenCount]="member.unseenCount"
+                                        [lastMessage] = "member.lastMessage"
+                                        [viewType]= "'conv'"
+                                        (onSelect)= "onConvSelect($event)"
+                                    ></app-chat-people>
+                                </div>
+                            </div>
+                        </div>
+                    
+                </div>
+            </div>
+              
         </div>
 
-        <!--  -->
-        <div class="col-8 border bg-white h-100 ps-0" >
-            <div class="row h-100 flex-nowrap">
+        <!-- chat column  -->
+        <div class="col border bg-white h-100 px-0" style=" position: relative; min-width: 20em;">
+            <div class="row border-start border-end bg-light mx-0">
+                <app-chat-box-top-bar *ngIf="selectedConv"
+                    [name]="selectedConv.nickName"
+                    [dp]="selectedConv.dp"
+                ></app-chat-box-top-bar>
+            </div>
+            <!-- message window -->
+            <div #scrollToEnd *ngIf="selectedConv" [ngClass]="{'px-5 py-2': true}" style="height: 85%; overflow-y: auto; background-color: azure; margin-bottom: 0; margin-top: 0;" (scroll)="scrollHandler($event)">
+                <div class="row mb-2" *ngFor="let message of messages" style="height: max-content;" style="margin-bottom: 0;">
+                    <app-messagelet 
+                        [text]="message.text"
+                        [from]="message.from"
+                        [timestamp]="message.timestamp"
+                        [toRight]="message.from === currentUser.publicUsername"
+                    ></app-messagelet>
+                </div>
+               
+            </div>
+            <!-- bottom msg input -->
+            <div *ngIf="selectedConv" class="row mx-0 w-100" style="position: absolute; bottom: 0; right: 0;">
+                <app-chat-box-bot-bar
+                    (onSubmit) = "sendToUser($event)"
+                ></app-chat-box-bot-bar>
+            </div>
+            <!-- <div class="row h-100 flex-nowrap">
                 <div class="col h-100" style="position: relative;">
-                    <div style="height: 100%; padding-bottom: 4.5em;">
-                        <div class="row border-start border-end bg-light ">
-                            <app-chat-box-top-bar></app-chat-box-top-bar>
-                        </div>
-                        <div [ngClass]="{'row border px-5': true, 'scroll-end': defaultScrollDown}" style="height: 94%; overflow-y: scroll; background-color: azure;" (scroll)="scrollHandler($event)">
-                            <app-messagelet *ngFor="let message of messages"
-                                [text]="message.text"
-                                [from]="message.from"
-                                [time]="message.timestamp"
-                            ></app-messagelet>
-                        </div>
+                    <div class="row" style="height: 100%; padding-bottom: 4.5em;">
+                        
+                        
                     </div>
                     
-                    <div style="width: 100%; position: absolute; bottom: 0; right: 0;">
-                        <app-chat-box-bot-bar></app-chat-box-bot-bar>
+                    
+                </div>
+            </div> -->
+        </div>
+        <!-- side collapse column -->
+        <div class="col-4 collapse collapse-horizontal p-0 border text-nowrap bg-white" id="searchChat">
+            <div class="row m-0 mb-1 bg-light w-100">
+                <div class="row py-2 flex-nowrap">
+                    <div class="col-4">
+                        <button class="btn" data-bs-toggle="collapse" data-bs-target="#searchChat" attr.aria-controls='searchChat'>
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                    <div class="col cut-text ">
+                        Search Messages
                     </div>
                 </div>
-                <div class="col-5 collapse p-0" id="searchChat">
-                    <div class="row m-0 mb-1 bg-light w-100">
-                        <div class="row py-2">
-                            <div class="col-4">
-                                <button class="btn" data-bs-toggle="collapse" data-bs-target="#searchChat" attr.aria-controls='searchChat'>
-                                    <i class="bi bi-x-lg"></i>
-                                </button>
-                            </div>
-                            <div class="col">
-                                Search Messages
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row m-0 mb-1 py-1 bg-light w-100">
-                        <app-search-bar></app-search-bar>
-                    </div>
-
+            </div>
+            <div class="row m-0 mb-2 py-1 bg-light w-100">
+                <app-search-bar
+                    [placeholder]="'Search...'"
+                    (onTextChange)="onMessageSearch($event)"
+                ></app-search-bar>
+            </div>
+            <div *ngFor="let msg of msgSearchResult" class="row mb-1 mx-0 py-2 bg-white border-bottom" (click) ="onSearchedMsgSelect(msg.timestamp)" >
+                <div style="font-size: 75%;">
+                    {{formatTime(msg.timestamp)}}
                 </div>
-
+                <div  class="cut-text" style="font-size: 90%;">
+                    {{msg.text}}
+                </div>
             </div>
 
-            
         </div>
-
     </div>
-    
+    <div *ngIf="!authService.isAuthenticated" class="mx-auto" style="width: 30%"> 
+        <app-login-page></app-login-page>
+    </div>
       
   </div>
