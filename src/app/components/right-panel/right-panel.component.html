@@ -1,0 +1,54 @@
+<div>
+    <div *ngIf="viewType === 'searchChat' ">
+        <div class="row m-0 mb-1 bg-light w-100">
+            <div class="row py-2 flex-nowrap">
+                <div class="col-4">
+                    <button class="btn" data-bs-toggle="collapse" data-bs-target="#rightPanel" attr.aria-controls='rightPanel' (click) ="togglerService.rightPaneltarget= 'rightPanel'; togglerService.showRightPanel = false">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="col cut-text ">
+                    Search Messages
+                </div>
+            </div>
+        </div>
+        <div class="row m-0 mb-2 py-1 bg-light w-100">
+            <app-search-bar
+                [placeholder]="'Search...'"
+                (onTextChange)="onMessageSearch($event)"
+            ></app-search-bar>
+        </div>
+        <div *ngFor="let msg of msgSearchResult" class="row mb-1 mx-0 py-2 bg-white border-bottom" (click) ="onSearchedMsgSelect.emit(msg.timestamp)" >
+            <div style="font-size: 75%;">
+                {{formatTime(msg.timestamp)}}
+            </div>
+            <div  class="cut-text" style="font-size: 90%;">
+                {{msg.text}}
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="viewType === 'userPref' ">
+        <div class="row m-0 mb-1 bg-light w-100">
+            <div class="row py-2 flex-nowrap">
+                <div class="col-4">
+                    <button class="btn" data-bs-toggle="collapse" data-bs-target="#rightPanel" attr.aria-controls='rightPanel' (click) ="togglerService.rightPaneltarget= 'rightPanel'; togglerService.showRightPanel = false">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+                <div class="col cut-text ">
+                    Contact Info
+                </div>
+            </div>
+        </div>
+
+        <div class="row p-2 w-100 mb-1 shadow-sm" style="overflow: hidden">
+            <div class="col-auto mx-auto border rounded-circle" style="width: 12em; height: 12em; overflow: hidden;">
+                <img [src]="'data:image/jpeg;base64,'+ selectedConv.dp" alt="image" style="width: 10em; height: 13em;">
+            </div>
+        </div >
+    </div>
+
+    
+
+</div>

@@ -9,7 +9,7 @@
     </div>
 
     <div class="col ps-0 my-1 border border-info rounded-pill bg-white ps-3" >
-        <input class="form-control border-0" type="text" placeholder="Type a new message" [(ngModel)]="msgTxt"/>
+        <input class="form-control border-0" type="text" placeholder="Type a new message" [(ngModel)]="msgTxt" (ngModelChange) = "textInputChange($event)" style="font-size: 90%;" />
     </div>
 
     <div class="col-2" style="width: auto;">

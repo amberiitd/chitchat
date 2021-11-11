@@ -15,6 +15,8 @@ import { ChatBoxBotBarComponent } from './components/chat-box-bot-bar/chat-box-b
 import { AuthService } from './service/auth.service';
 import { DataService } from './service/data.service';
 import { LoginPageComponent } from './components/login-page/login-page.component';
+import { RightPanelComponent } from './components/right-panel/right-panel.component';
+import { TogglerService } from './service/toggler.service';
 
 @NgModule({
   declarations: [
@@ -26,14 +28,15 @@ import { LoginPageComponent } from './components/login-page/login-page.component
     ChatPeopleComponent,
     ChatBoxTopBarComponent,
     ChatBoxBotBarComponent,
-    LoginPageComponent
+    LoginPageComponent,
+    RightPanelComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpClientModule
   ],
-  providers: [MessageService, AuthService, DataService],
+  providers: [MessageService, AuthService, DataService, TogglerService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

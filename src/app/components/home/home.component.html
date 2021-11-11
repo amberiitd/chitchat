@@ -1,13 +1,12 @@
 <div  class="h-100">
     <div *ngIf="authService.isAuthenticated" class="row h-100 flex-nowrap shadow" style="overflow-x: auto;">
  
-        <!-- chat contacts  -->
-        <div class="col-4 border  bg-white h-100 px-0" style="position: relative;">
+        <div class="col-3 border  bg-white h-100 px-0" style="position: relative;">
             <div class="row m-0 p-0 h-100 justify-content-between">
                 <!-- profile -->
-                <div class="profile collapse collapse-horizontal text-nowrap p-0 bg-light h-100" 
+                <div class="profile collapse collapse-horizontal text-nowrap p-0 bg-light" 
                     id = "userProfile"
-                    style="min-width: 0%;">
+                    style="min-width: 0%; height: 90%;">
                     <div class="row align-items-end mb-1 mx-0" style="height: 5.9em; background-color: #b0f7f7;">
                         <div class="col">
                             <button class="btn" data-bs-toggle = "collapse" data-bs-target=".profile" attr.aria-controls="userProfile chatMenu" aria-expanded="false">
@@ -102,7 +101,7 @@
                         <!-- people -->
                         <div class="" style="height: 85%">
                             <div class="" style="height: 100%;  overflow-x: hidden; padding-right: -0.5em;">
-                                <div *ngFor="let member of peopleList" class="row mx-0 pe-2" [ngStyle]="{'background-color': member.style?member.style.bg: 'inherit'}">
+                                <div *ngFor="let member of peopleList" class="row mx-0" [ngStyle]="{'background-color': member.style?member.style.bg: 'inherit'}">
                                     <app-chat-people
                                         [id]= "member.publicUsername"
                                         [name]= "member.nickName"
@@ -127,16 +126,19 @@
                 <app-chat-box-top-bar *ngIf="selectedConv"
                     [name]="selectedConv.nickName"
                     [dp]="selectedConv.dp"
+                    [isTyping] ="selectedConv.isTyping"
+                    (rightPanelView) ="toggleRightPanel($event)"
                 ></app-chat-box-top-bar>
             </div>
             <!-- message window -->
-            <div #scrollToEnd *ngIf="selectedConv" [ngClass]="{'px-5 py-2': true}" style="height: 85%; overflow-y: auto; background-color: azure; margin-bottom: 0; margin-top: 0;" (scroll)="scrollHandler($event)">
+            <div #scrollToEnd *ngIf="selectedConv" [ngClass]="{'px-5 py-2': true}" style="height: 86%; overflow-y: auto; background-color: azure; margin-bottom: 0; margin-top: 0;" (scroll)="scrollHandler($event)">
                 <div class="row mb-2" *ngFor="let message of messages" style="height: max-content;" style="margin-bottom: 0;">
                     <app-messagelet 
                         [text]="message.text"
                         [from]="message.from"
                         [timestamp]="message.timestamp"
                         [toRight]="message.from === currentUser.publicUsername"
+                        [viewed]="!message.notViewed"
                     ></app-messagelet>
                 </div>
                
@@ -159,34 +161,12 @@
             </div> -->
         </div>
         <!-- side collapse column -->
-        <div class="col-4 collapse collapse-horizontal p-0 border text-nowrap bg-white" id="searchChat">
-            <div class="row m-0 mb-1 bg-light w-100">
-                <div class="row py-2 flex-nowrap">
-                    <div class="col-4">
-                        <button class="btn" data-bs-toggle="collapse" data-bs-target="#searchChat" attr.aria-controls='searchChat'>
-                            <i class="bi bi-x-lg"></i>
-                        </button>
-                    </div>
-                    <div class="col cut-text ">
-                        Search Messages
-                    </div>
-                </div>
-            </div>
-            <div class="row m-0 mb-2 py-1 bg-light w-100">
-                <app-search-bar
-                    [placeholder]="'Search...'"
-                    (onTextChange)="onMessageSearch($event)"
-                ></app-search-bar>
-            </div>
-            <div *ngFor="let msg of msgSearchResult" class="row mb-1 mx-0 py-2 bg-white border-bottom" (click) ="onSearchedMsgSelect(msg.timestamp)" >
-                <div style="font-size: 75%;">
-                    {{formatTime(msg.timestamp)}}
-                </div>
-                <div  class="cut-text" style="font-size: 90%;">
-                    {{msg.text}}
-                </div>
-            </div>
-
+        <div #rightPanel [ngClass]="{'col-3 collapse collapse-horizontal p-0 border text-nowrap bg-white': true}" id="rightPanel" style="">
+            <app-right-panel
+                [selectedConv] ="selectedConv"
+                [viewType]="rightPanelViewType"
+                (onSearchedMsgSelect)= "onSearchedMsgSelect($event)"
+            ></app-right-panel>
         </div>
     </div>
     <div *ngIf="!authService.isAuthenticated" class="mx-auto" style="width: 30%"> 

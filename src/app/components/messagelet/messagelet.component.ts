@@ -19,6 +19,9 @@ export class MessageletComponent implements OnInit, OnChanges {
   @Input()
   public toRight= true;
 
+  @Input()
+  public viewed = false;
+
   public formattedTime: string ="00:00";
 
   public horizontalAlign = 'left';
@@ -30,7 +33,9 @@ export class MessageletComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    this.formattedTime = formatTime(changes['timestamp'].currentValue);
+    if(changes['timestamp']){
+      this.formattedTime = formatTime(changes['timestamp'].currentValue);
+    }
     
   }
 

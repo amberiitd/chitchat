@@ -1,17 +1,18 @@
 <div class="row py-2">
-    <div class="inline-block mx-2" style="width: 3em;">
-        <div class="rounded-circle border border-info" style="width: 3em; height: 3em; overflow: hidden;">
-            <img   [src]="'data:image/jpeg;base64,'+ dp" alt="dp" style="width: 3em; height: 3.5em;"/>
-        </div>
+    <div #profile class="inline-block mx-2" style="width: 3em;">
+        <button class="p-0 rounded-circle border border-info" data-bs-toggle="collapse" [attr.data-bs-target]="'#'+ togglerService.rightPaneltarget" attr.aria-controls='rightPanel' style="width: 3em; height: 3em; overflow: hidden;" (click)= "toggler('userPref')">
+            <img   [src]="'data:image/jpeg;base64,'+ dp" alt="dp" style="width: 3em; height: 3.5em; "/>
+        </button>
     </div>
     <div class="col m">
-        <h5 class="m-0 mt-2 p-0">
+        <h5 class="m-0 mt-1 p-0">
             {{name}}
         </h5>
+        <p class="m-0 p-0" *ngIf="isTyping" style="font-size: 75%;">typing...</p>
     </div>
     <div class="col ">
         <div align="right">
-            <button class="btn" data-bs-toggle="collapse" data-bs-target="#searchChat" attr.aria-controls='searchChat'>
+            <button #search class="btn" data-bs-toggle="collapse" [attr.data-bs-target]="'#'+ togglerService.rightPaneltarget" attr.aria-controls='rightPanel' (click)="toggler('searchChat')">
                 <i class="bi bi-search"></i>
             </button>
             <button class="btn">

@@ -5,8 +5,10 @@ export interface OutMessage extends InMessage{
 }
 
 export interface InMessage{
+    type: 'message' | 'typing' | 'viewNotif';
     from: string;
     text: string;
+    notViewed: boolean;
     timestamp: number;
 }
 
@@ -27,7 +29,9 @@ export interface MessageQuery{
 }
 
 export const defaultInMessage: InMessage = {
+    type: "message",
     from: "",
     text: "",
+    notViewed: false,
     timestamp: 0,
 }

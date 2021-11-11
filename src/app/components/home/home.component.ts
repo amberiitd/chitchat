@@ -4,8 +4,9 @@ import { isEmpty } from 'lodash';
 import { defaultUser, User } from 'src/app/model/User.model';
 import { AuthService } from 'src/app/service/auth.service';
 import { DataService } from 'src/app/service/data.service';
+import { TogglerService } from 'src/app/service/toggler.service';
 import { formatTime } from 'src/app/util/util-method';
-import { OutMessage, InMessage } from '../../model/message.model';
+import { OutMessage, InMessage, defaultInMessage } from '../../model/message.model';
 import { People, PeopleDTO } from '../../model/people.model';
 import { MessageService } from '../../service/message.service';
 
@@ -14,9 +15,11 @@ import { MessageService } from '../../service/message.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit, AfterViewChecked {
+export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
 
   @ViewChild('scrollToEnd') private myScrollContainer: ElementRef;
+  @ViewChild('rightPanel') private rightPanel: ElementRef;
+
 
   public currentUser: User = defaultUser;
   public msgList: Array<InMessage>= [];
@@ -32,16 +35,19 @@ export class HomeComponent implements OnInit, AfterViewChecked {
   public contacts: Array<People> = [];
   public searchedContacts: Array<People> = [];
 
-  public messages: Array<InMessage> = []
-  public msgSearchResult: Array<InMessage> = []
+  public messages: Array<InMessage> = [];
+  public msgSearchResult: Array<InMessage> = [];
+  public rightPanelViewType: 'searchChat' | 'userPref' = 'searchChat';
   
   public formatTime = formatTime;
 
   constructor(
     private readonly messageService: MessageService,
     private readonly dataService: DataService,
-    public readonly authService: AuthService
+    public readonly authService: AuthService,
+    public readonly togglerService: TogglerService
   ) { }
+  
 
   ngOnInit(): void {
     
@@ -57,6 +63,12 @@ export class HomeComponent implements OnInit, AfterViewChecked {
         this.msgList.push(msg);
       }
     )
+  }
+
+  ngAfterViewInit(): void {
+    // this.rightPanel.nativeElement.addEventListener('hide.bs.collapse', (e: any) =>{
+    //   e.preventDefault();
+    // })
   }
 
   ngAfterViewChecked(): void {
@@ -79,23 +91,56 @@ export class HomeComponent implements OnInit, AfterViewChecked {
       msg =>{
         const index = this.peopleList.findIndex(conv => conv.publicUsername === msg.from );
         if (index >= 0 ){
-          if (this.peopleList[index].init){
-            this.peopleList[index].messages.push(msg);
 
-            if(this.selectedConv.publicUsername === this.peopleList[index].publicUsername){
-              this.defaultScrollDown = true;
-              this.messageService.notify(
-                {
-                  type: "msg_seen", 
-                  from: this.selectedConv.publicUsername, 
-                  to: this.currentUser.publicUsername
+          switch (msg.type){
+            case 'message':
+              this.peopleList[index].lastMessage = msg;
+
+              if (this.peopleList[index].init){
+                this.peopleList[index].messages.push(msg);
+    
+                if(this.selectedConv.publicUsername === this.peopleList[index].publicUsername){
+                  this.defaultScrollDown = true;
+                  this.messageService.notify(
+                    {
+                      type: "msg_seen", 
+                      from: this.selectedConv.publicUsername, 
+                      to: this.currentUser.publicUsername
+                    }
+                  );
                 }
-              );
-            }
-          }else{
-            this.peopleList[index].unseenCount +=1;
+              }else{
+                this.peopleList[index].unseenCount +=1;
+              }
+              
+              break;
+
+            case 'typing':
+              if(this.selectedConv && this.selectedConv.publicUsername === this.peopleList[index].publicUsername){
+                this.selectedConv.isTyping = true;
+                setTimeout(()=>{this.selectedConv.isTyping = false}, 1990);
+              }
+
+              break;
+
+            case 'viewNotif':
+              if(this.selectedConv){
+                this.messages.slice(this.messages.length - this.selectedConv.notViewedCount).forEach(
+                  msg =>{
+                    msg.notViewed = false;
+                  }
+                )
+              }else{
+                this.peopleList[index].notViewedCount = 0;
+              }
+              
+
+              break;
+
+            default:
+              break;
           }
-          this.peopleList[index].lastMessage = msg;
+          
         }
 
       }
@@ -131,35 +176,48 @@ export class HomeComponent implements OnInit, AfterViewChecked {
     );
   }
 
-  sendToUser(msgText: string){
-    if (isEmpty(msgText.trim())){
+  sendToUser(data : {type: any, msgText?: string}){
+    if (data.type == 'typing'){
+      const outMsg: OutMessage = {
+        ...defaultInMessage,
+        type: "typing",
+        to: this.selectedConv.publicUsername,
+        from: this.currentUser.publicUsername
+      }
+
+      this.messageService.sendToUser(outMsg);
+    }
+    else if ((data.type === 'message' && data.msgText && !isEmpty(data.msgText.trim()))){
+      const inMsg: InMessage = {
+        type: 'message',
+        from: this.currentUser.publicUsername,
+        text: data.msgText?? "",
+        notViewed: true,
+        timestamp: this.getTimeNow()
+
+      }
+      const outMsg: OutMessage ={
+        ...inMsg,
+        to: this.selectedConv.publicUsername
+      }
+
+      if(!this.selectedConv.messages){
+        //add to conv 
+        this.selectedConv.messages= []
+        this.messages = this.selectedConv.messages;
+        this.peopleList.splice(0, 0, this.selectedConv);
+        this.dataService.saveConv(this.selectedConv.publicUsername, () =>{});
+      }
+      this.selectedConv.messages.push(inMsg);
+      this.selectedConv.notViewedCount+=1;
+      this.selectedConv.lastMessage = inMsg;
+      this.messageService.sendToUser(outMsg);
+      this.defaultScrollDown = true;
+
+      this.newmsg = "";
+
       return;
     }
-
-    const inMsg: InMessage = {
-      from: this.currentUser.publicUsername,
-      text: msgText,
-      timestamp: this.getTimeNow()
-
-    }
-    const outMsg: OutMessage ={
-      ...inMsg,
-      to: this.selectedConv.publicUsername
-    }
-
-    if(!this.selectedConv.messages){
-      //add to conv 
-      this.selectedConv.messages= []
-      this.messages = this.selectedConv.messages;
-      this.peopleList.splice(0, 0, this.selectedConv);
-      this.dataService.saveConv(this.selectedConv.publicUsername, () =>{});
-    }
-    this.selectedConv.messages.push(inMsg);
-    this.selectedConv.lastMessage = inMsg;
-    this.messageService.sendToUser(outMsg);
-    this.defaultScrollDown = true;
-
-    this.newmsg = "";
   }
 
   getTimeNow(){
@@ -212,18 +270,33 @@ export class HomeComponent implements OnInit, AfterViewChecked {
         this.messageService.getMsgs( {from: this.selectedConv.publicUsername},
           (msgs: Array<InMessage>) =>{
             this.selectedConv.messages.push(...msgs);
+            this.messages.slice(this.messages.length - this.selectedConv.notViewedCount).forEach(
+              msg =>{
+                msg.notViewed = true;
+              }
+            )
             this.messageService.notify(
-                {
-                  type: "msg_seen", 
-                  from: this.selectedConv.publicUsername, 
-                  to: this.currentUser.publicUsername
-                }
-              );
+              {
+                type: "msg_seen", 
+                from: this.selectedConv.publicUsername, 
+                to: this.currentUser.publicUsername
+              }
+            );
             this.selectedConv.unseenCount = 0;
             this.defaultScrollDown = true;
           }
-        );
+        ); 
       }
+
+      this.messageService.notify(
+        {
+          type: "msg_seen", 
+          from: this.selectedConv.publicUsername, 
+          to: this.currentUser.publicUsername
+        }
+      );
+      this.selectedConv.unseenCount = 0;
+      this.defaultScrollDown = true;
     }
   }
 
@@ -254,6 +327,10 @@ export class HomeComponent implements OnInit, AfterViewChecked {
     });
   }
 
+  toggleRightPanel(view: any){
+    this.rightPanelViewType = view;
+  }
+
   onContactSearch(text: string){
     if(text === ''){
       this.searchedContacts = [...this.contacts];
@@ -269,31 +346,6 @@ export class HomeComponent implements OnInit, AfterViewChecked {
     }else{
       this.searchedContacts = this.contacts.filter(contact => contact.nickName.toLocaleLowerCase().includes(text.toLocaleLowerCase()))
     
-    }
-  }
-
-  onMessageSearch(text: string){
-
-    var lastText: any;
-    const timerCallBack = () =>{
-      if( lastText === text){
-        this.messageService.getMsgs(
-          {from: this.selectedConv.publicUsername, searchText: text}, 
-          (data: any) => {
-            this.msgSearchResult = data;
-          }  
-        )
-      }else{
-        lastText = text;
-        setTimeout(timerCallBack, 1000);
-      }
-    };
-
-    if(text === ''){
-      this.msgSearchResult = [];
-    }else{
-      lastText = text;
-      setTimeout(timerCallBack, 1000);
     }
   }
 

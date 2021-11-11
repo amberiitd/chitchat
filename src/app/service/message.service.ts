@@ -64,6 +64,7 @@ export class MessageService {
     }
 
     send(msg: OutMessage){
+        console.log(msg)
         this.stompClient.send("/app/broadcast", {}, JSON.stringify(msg))
     }
 

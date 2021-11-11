@@ -12,5 +12,6 @@ export interface PeopleDTO{
     dp: Blob;
     lastMessage: InMessage;
     unseenCount: number;
+    notViewedCount: number;
     status: string;
 }
