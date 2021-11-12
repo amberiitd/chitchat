@@ -7,6 +7,31 @@
     border-radius: 10px;
 }
 
+.chat-window1::-webkit-scrollbar-track {
+    margin-top: 4em;
+    margin-bottom: 4em;
+}
+.chat-window1{
+    padding-top: 4em;
+    padding-bottom: 4em;
+}
+
+.chat-window2::-webkit-scrollbar-track {
+    margin-top: 4em;
+    margin-bottom: 7em;
+}
+.chat-window2{
+    padding-top: 4em;
+    padding-bottom: 7em; 
+}
+.conv-list::-webkit-scrollbar-track {
+    margin-top: 7.5em;
+}
+.conv-list{
+    overflow-y: auto;
+    padding-top: 7.5em;
+}
+
 ::-webkit-scrollbar-thumb {
     border-radius: 10px;
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 

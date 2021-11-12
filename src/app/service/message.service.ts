@@ -6,6 +6,7 @@ import { Subject, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import * as SockJS from 'sockjs-client';
 import { InMessage, MessageQuery, Notification, OutMessage } from '../model/message.model';
+import { People } from '../model/people.model';
 import { AuthService } from './auth.service';
 
 @Injectable()

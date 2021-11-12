@@ -1,4 +1,4 @@
-import { InMessage } from "./message.model";
+import { defaultInMessage, InMessage } from "./message.model";
 
 export interface People extends PeopleDTO{
     init: boolean;
@@ -14,4 +14,16 @@ export interface PeopleDTO{
     unseenCount: number;
     notViewedCount: number;
     status: string;
+}
+
+export const defaultPeople: People = {
+    init: false,
+    messages: [],
+    publicUsername: "string",
+    nickName: "string",
+    dp: new Blob(),
+    lastMessage: defaultInMessage,
+    unseenCount: 0,
+    notViewedCount: 0,
+    status: "string",
 }

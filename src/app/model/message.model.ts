@@ -1,4 +1,3 @@
-import { IMessage } from "@stomp/stompjs";
 
 export interface OutMessage extends InMessage{
     to: string;
@@ -10,6 +9,7 @@ export interface InMessage{
     text: string;
     notViewed: boolean;
     timestamp: number;
+    parentId?: number; // timestamp for now 
 }
 
 export interface Notification{

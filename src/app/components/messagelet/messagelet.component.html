@@ -1,7 +1,17 @@
-<div [class]="{'row': true, 'justify-content-end': toRight}" >
-    <div class="col-auto px-0 " style=" position: relative; max-width: 30em;">
+<div [class]="{'row': true, 'justify-content-end': toRight}">
+    <div class="col-auto px-0 " style=" position: relative; max-width: 25em;">
         <div class="border shadow-sm p-0 px-3 py-1" [ngStyle]="!toRight?  { 'border-radius': '10px', 'border-top-left-radius': 0, 'background-color': '#fff'} : { 'border-radius': '10px', 'border-top-right-radius': 0, 'background-color': '#b0f7f7'}">
+            <!-- parent -->
+            <div *ngIf="parentMessage" class="px-2 mt-1 rounded-3 border-start border-info border-3 bg-light mb-1" style="opacity: 0.5;" (click) = "searchParentMessage()">
+                <p class="text-info mb-0" style="font-size: 90%;">{{parentSender}}</p>
+                <div class="pb-1 text-secondary" style="font-size: 75%; ">
+                    {{parentMessage.text}}
+                </div>
+            </div>
+
             <div class="" style="position: relative; padding-right: 5em;">
+                
+                <!-- msg body -->
                 <span style="font-size: 90%;">{{text}}</span>
                 
                 <div style="position: absolute; right: 0; bottom: 0; font-size: 75%;">

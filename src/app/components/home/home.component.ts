@@ -1,4 +1,3 @@
-import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { AfterViewChecked, AfterViewInit, Component, ElementRef, OnInit, Output, ViewChild } from '@angular/core';
 import { isEmpty } from 'lodash';
 import { defaultUser, User } from 'src/app/model/User.model';
@@ -7,7 +6,7 @@ import { DataService } from 'src/app/service/data.service';
 import { TogglerService } from 'src/app/service/toggler.service';
 import { formatTime } from 'src/app/util/util-method';
 import { OutMessage, InMessage, defaultInMessage } from '../../model/message.model';
-import { People, PeopleDTO } from '../../model/people.model';
+import { defaultPeople, People, PeopleDTO } from '../../model/people.model';
 import { MessageService } from '../../service/message.service';
 
 @Component({
@@ -38,6 +37,10 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
   public messages: Array<InMessage> = [];
   public msgSearchResult: Array<InMessage> = [];
   public rightPanelViewType: 'searchChat' | 'userPref' = 'searchChat';
+
+  public replyToMessage: InMessage | undefined;
+  public replyToPeople: string | undefined;
+  public addchatBoxClass:"chat-window1" | "chat-window2"  = "chat-window1";
   
   public formatTime = formatTime;
 
@@ -46,7 +49,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
     private readonly dataService: DataService,
     public readonly authService: AuthService,
     public readonly togglerService: TogglerService
-  ) { }
+  ) {   }
   
 
   ngOnInit(): void {
@@ -79,6 +82,12 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
   }
 
   init(){
+    this.togglerService.scrollBottom.subscribe(
+      () => {
+        this.defaultScrollDown = true;
+      }
+    )
+
     this.authService.getCurrentUser(
       user =>{
         this.currentUser = user;
@@ -194,8 +203,12 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
         text: data.msgText?? "",
         notViewed: true,
         timestamp: this.getTimeNow()
-
       }
+
+      if (this.replyToMessage){
+        inMsg.parentId = this.replyToMessage.timestamp;
+      }
+
       const outMsg: OutMessage ={
         ...inMsg,
         to: this.selectedConv.publicUsername
@@ -251,7 +264,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
   }
   scrollToBottom(): void {
     try {
-        this.myScrollContainer.nativeElement.scrollTop = this.myScrollContainer.nativeElement.scrollHeight-this.myScrollContainer.nativeElement.clientHeight;
+        this.myScrollContainer.nativeElement.scrollTop = this.myScrollContainer.nativeElement.scrollHeight-this.myScrollContainer.nativeElement.clientHeight- 5;
     } catch(err) { }                 
   }
 
@@ -358,4 +371,22 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
     )
   }
 
+  replyTo(msg: InMessage){
+    this.replyToMessage = msg;
+
+    if (msg.from === this.currentUser.publicUsername){
+      this.replyToPeople = "You"
+    }else{
+      this.replyToPeople = this.selectedConv.nickName;
+    }
+
+    this.addchatBoxClass = 'chat-window2';
+    this.defaultScrollDown = true;
+  }
+
+  cancelReply(event: any){
+    this.replyToMessage = undefined;
+    this.replyToPeople = undefined;
+    this.addchatBoxClass ="chat-window1";
+  }
 }

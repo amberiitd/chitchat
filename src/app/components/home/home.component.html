@@ -1,13 +1,13 @@
 <div  class="h-100">
     <div *ngIf="authService.isAuthenticated" class="row h-100 flex-nowrap shadow" style="overflow-x: auto;">
  
-        <div class="col-3 border  bg-white h-100 px-0" style="position: relative;">
+        <div class="col-3 border  bg-white h-100 px-0" style="position: relative; min-width: 15em;">
             <div class="row m-0 p-0 h-100 justify-content-between">
                 <!-- profile -->
                 <div class="profile collapse collapse-horizontal text-nowrap p-0 bg-light" 
                     id = "userProfile"
-                    style="min-width: 0%; height: 90%;">
-                    <div class="row align-items-end mb-1 mx-0" style="height: 5.9em; background-color: #b0f7f7;">
+                    style="min-width: 0%; height: 90%; overflow-x: hidden">
+                    <div class="align-items-end mb-1 mx-0" style="height: 7em; background-color: #b0f7f7;">
                         <div class="col">
                             <button class="btn" data-bs-toggle = "collapse" data-bs-target=".profile" attr.aria-controls="userProfile chatMenu" aria-expanded="false">
                                 <i class="bi bi-arrow-left"></i>
@@ -16,8 +16,8 @@
                         </div>
                     </div>
 
-                    <div class="row p-2 w-100 mb-1" style="overflow: hidden">
-                        <div class="col-auto mx-auto border rounded-circle" style="width: 12em; height: 12em; overflow: hidden;">
+                    <div class="py-2 mb-1" style="padding-left: 20%; overflow-x: hidden;">
+                        <div class="border rounded-circle" style="width: 12em; height: 12em; overflow: hidden;">
                             <img [src]="'data:image/jpeg;base64,'+ currentUser.dp" alt="image" style="width: 10em; height: 13em;">
                         </div>
                     </div >
@@ -70,8 +70,8 @@
                 </div>
 
                 <!-- chat side menu -->
-                <div *ngIf="firstColumn === 'conv'" class="contacts profile collapse collapse-horizontal show border-end text-nowrap p-0" id="chatMenu" style="min-width: 0%;">
-                        <div class="">
+                <div *ngIf="firstColumn === 'conv'" class="contacts profile collapse collapse-horizontal show border-end text-nowrap p-0 h-100" id="chatMenu" style="min-width: 0%; position: relative;">
+                        <div class="" style="position: absolute; right: 0; left: 0">
                             <div class="row mb-1 bg-light mx-0 py-1">
                                 <app-chat-tool-bar
                                     [dp] = "currentUser.dp"
@@ -99,19 +99,17 @@
                         </div>
                     
                         <!-- people -->
-                        <div class="" style="height: 85%">
-                            <div class="" style="height: 100%;  overflow-x: hidden; padding-right: -0.5em;">
-                                <div *ngFor="let member of peopleList" class="row mx-0" [ngStyle]="{'background-color': member.style?member.style.bg: 'inherit'}">
-                                    <app-chat-people
-                                        [id]= "member.publicUsername"
-                                        [name]= "member.nickName"
-                                        [dp]= "member.dp"
-                                        [unseenCount]="member.unseenCount"
-                                        [lastMessage] = "member.lastMessage"
-                                        [viewType]= "'conv'"
-                                        (onSelect)= "onConvSelect($event)"
-                                    ></app-chat-people>
-                                </div>
+                        <div class="conv-list" style="height: 100%;  overflow-x: hidden; padding-right: -0.5em;">
+                            <div *ngFor="let member of peopleList" class="row mx-0" [ngStyle]="{'background-color': member.style?member.style.bg: 'inherit'}">
+                                <app-chat-people
+                                    [id]= "member.publicUsername"
+                                    [name]= "member.nickName"
+                                    [dp]= "member.dp"
+                                    [unseenCount]="member.unseenCount"
+                                    [lastMessage] = "member.lastMessage"
+                                    [viewType]= "'conv'"
+                                    (onSelect)= "onConvSelect($event)"
+                                ></app-chat-people>
                             </div>
                         </div>
                     
@@ -121,8 +119,9 @@
         </div>
 
         <!-- chat column  -->
-        <div class="col border bg-white h-100 px-0" style=" position: relative; min-width: 20em;">
-            <div class="row border-start border-end bg-light mx-0">
+        <div class="col border bg-white h-100 px-0" style=" position: relative; min-width: 30em;">
+            <!-- chat top -->
+            <div class="row border-end bg-light mx-0" style="position: absolute; top: 0; right: 0; left: 0; z-index: 3;">
                 <app-chat-box-top-bar *ngIf="selectedConv"
                     [name]="selectedConv.nickName"
                     [dp]="selectedConv.dp"
@@ -131,21 +130,27 @@
                 ></app-chat-box-top-bar>
             </div>
             <!-- message window -->
-            <div #scrollToEnd *ngIf="selectedConv" [ngClass]="{'px-5 py-2': true}" style="height: 86%; overflow-y: auto; background-color: azure; margin-bottom: 0; margin-top: 0;" (scroll)="scrollHandler($event)">
-                <div class="row mb-2" *ngFor="let message of messages" style="height: max-content;" style="margin-bottom: 0;">
+            <div #scrollToEnd *ngIf="selectedConv" [class]="'px-5 '+ addchatBoxClass" style="height: 100%; overflow-y: auto; background-color: azure; " (scroll)="scrollHandler($event)">
+                <div class="row mb-2" *ngFor="let message of messages" style="height: max-content;" style="margin-bottom: 0;" (dblclick)= "replyTo(message)">
                     <app-messagelet 
                         [text]="message.text"
                         [from]="message.from"
                         [timestamp]="message.timestamp"
                         [toRight]="message.from === currentUser.publicUsername"
                         [viewed]="!message.notViewed"
+                        [parentId]= "message.parentId"
+                        [convUser]="selectedConv"
+                        (lookParent) ="onSearchedMsgSelect($event)"
                     ></app-messagelet>
                 </div>
                
             </div>
             <!-- bottom msg input -->
-            <div *ngIf="selectedConv" class="row mx-0 w-100" style="position: absolute; bottom: 0; right: 0;">
-                <app-chat-box-bot-bar
+            <div *ngIf="selectedConv" class="row mx-0 px-0 w-100" style="position: absolute; bottom: 0; right: 0; left: 0;">
+                <app-chat-box-bot-bar class="px-0 w-100"
+                    [replyToPeople]= "replyToPeople"
+                    [replyToMessage]="replyToMessage"
+                    (cancelReply) ="cancelReply($event)"
                     (onSubmit) = "sendToUser($event)"
                 ></app-chat-box-bot-bar>
             </div>
@@ -161,7 +166,7 @@
             </div> -->
         </div>
         <!-- side collapse column -->
-        <div #rightPanel [ngClass]="{'col-3 collapse collapse-horizontal p-0 border text-nowrap bg-white': true}" id="rightPanel" style="">
+        <div #rightPanel [ngClass]="{'col-3 collapse collapse-horizontal p-0 border text-nowrap bg-white': true}" id="rightPanel" style="min-width: 15em;">
             <app-right-panel
                 [selectedConv] ="selectedConv"
                 [viewType]="rightPanelViewType"
