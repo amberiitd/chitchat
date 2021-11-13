@@ -81,4 +81,27 @@ export class DataService{
             res => {callBack()}
         );
     }
+
+    getNotifSound( callBack: any){
+        const options= {
+            headers: {
+                'Authorization': "Basic "+ this.authService.getAuthToken(),
+            },
+            responseType: 'blob' as 'json'
+        }
+        this.http.get<Blob>(this.api + "/notif-sound", options)
+        .pipe(
+            // catchError(
+            //     (error: any) => {
+            //         console.log(error);
+            //         return throwError(error)
+            //     }
+            // )
+        )
+        .subscribe( 
+            data => {
+                callBack(data);
+            }
+        )
+    }
 }

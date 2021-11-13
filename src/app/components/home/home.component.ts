@@ -27,6 +27,12 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
 
   public peopleList: Array<People> =[];
   public searchedConvList: Array<People> =[];
+  public sound: {
+    bytes: Blob;
+    audioCtx: AudioContext;
+    audioBuffer: AudioBuffer | undefined;
+
+  }
 
   public selectedConv: any;
   public connectionStatus: 'disconnected' | 'connected' | 'loading' = 'loading';
@@ -82,9 +88,22 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
   }
 
   init(){
-    this.togglerService.scrollBottom.subscribe(
-      () => {
-        this.defaultScrollDown = true;
+    // this.togglerService.scrollBottom.subscribe(
+    //   () => {
+    //     this.defaultScrollDown = true;
+    //   }
+    // )
+
+    this.dataService.getNotifSound(
+      async (data: Blob) => {
+
+        this.sound= {
+          bytes : data,
+          audioCtx: new AudioContext(),
+          audioBuffer: undefined
+        }
+        this.sound.audioCtx.decodeAudioData(await this.sound.bytes.arrayBuffer(), (input)=>{this.sound.audioBuffer = input});
+         
       }
     )
 
@@ -104,19 +123,25 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
           switch (msg.type){
             case 'message':
               this.peopleList[index].lastMessage = msg;
-
+              this.playNotifSound();
+              
               if (this.peopleList[index].init){
-                this.peopleList[index].messages.push(msg);
+                this.peopleList[index].messages.push(msg); // conv message always have last message if init= true
     
-                if(this.selectedConv.publicUsername === this.peopleList[index].publicUsername){
+                if(this.selectedConv.publicUsername === this.peopleList[index].publicUsername
+                  && this.messages[this.messages.length -1].timestamp === this.selectedConv.lastMessage.timestamp){
                   this.defaultScrollDown = true;
+
                   this.messageService.notify(
                     {
                       type: "msg_seen", 
                       from: this.selectedConv.publicUsername, 
-                      to: this.currentUser.publicUsername
+                      to: this.currentUser.publicUsername,
+                      endTime: this.messages[this.messages.length-1].timestamp
                     }
                   );
+                }else{
+                  this.peopleList[index].unseenCount +=1;
                 }
               }else{
                 this.peopleList[index].unseenCount +=1;
@@ -134,6 +159,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
 
             case 'viewNotif':
               if(this.selectedConv){
+                // for ui live change 
                 this.messages.slice(this.messages.length - this.selectedConv.notViewedCount).forEach(
                   msg =>{
                     msg.notViewed = false;
@@ -207,6 +233,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
 
       if (this.replyToMessage){
         inMsg.parentId = this.replyToMessage.timestamp;
+        inMsg.parent = this.replyToMessage
       }
 
       const outMsg: OutMessage ={
@@ -225,6 +252,9 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
       this.selectedConv.notViewedCount+=1;
       this.selectedConv.lastMessage = inMsg;
       this.messageService.sendToUser(outMsg);
+
+      // reconnect to selected conv messages
+      this.messages = this.selectedConv.messages
       this.defaultScrollDown = true;
 
       this.newmsg = "";
@@ -244,19 +274,32 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
     //                 + currentdate.getSeconds();
   }
   scrollHandler(event: any){
-    if (this.myScrollContainer.nativeElement.scrollHeight === this.myScrollContainer.nativeElement.clientHeight + this.myScrollContainer.nativeElement.scrollTop
-      && this.messages[this.messages.length -1].timestamp < this.selectedConv.lastMessage.timestamp){
-      this.messageService.getMsgs(
-        {from: this.selectedConv.publicUsername, startTime: this.messages[this.messages.length-1].timestamp}, 
-        (data: any[]) => {
-          this.messages.push(...data.slice(1));
-        }  
-      )
+    if (this.myScrollContainer.nativeElement.scrollHeight === this.myScrollContainer.nativeElement.clientHeight + this.myScrollContainer.nativeElement.scrollTop){
+      if ( this.messages[this.messages.length -1].timestamp < this.selectedConv.lastMessage.timestamp){
+        this.messageService.getMsgs(
+          {from: this.selectedConv.publicUsername, startTime: this.messages[this.messages.length-1].timestamp}, 
+          (data: any[]) => {
+            this.messages.push(...data.slice(1));
+          }  
+        )
+      }else{
+        this.messages = this.selectedConv.messages;
+        this.messageService.notify(
+          {
+            type: "msg_seen", 
+            from: this.selectedConv.publicUsername, 
+            to: this.currentUser.publicUsername,
+            endTime: this.messages[this.messages.length-1].timestamp
+          }
+        );
+        this.selectedConv.unseenCount = 0;
+      }
+      
     }else if(this.myScrollContainer.nativeElement.scrollTop === 0){
       this.messageService.getMsgs(
         {from: this.selectedConv.publicUsername, endTime: this.messages[0].timestamp}, 
         (data: any) => {
-          this.messages=[...data, ...this.messages];
+          this.messages.splice(0, 0,...data); // so as not to disconnect selectedConv to messages
         }  
       )
     }
@@ -283,33 +326,30 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
         this.messageService.getMsgs( {from: this.selectedConv.publicUsername},
           (msgs: Array<InMessage>) =>{
             this.selectedConv.messages.push(...msgs);
-            this.messages.slice(this.messages.length - this.selectedConv.notViewedCount).forEach(
-              msg =>{
-                msg.notViewed = true;
-              }
-            )
             this.messageService.notify(
               {
                 type: "msg_seen", 
                 from: this.selectedConv.publicUsername, 
-                to: this.currentUser.publicUsername
+                to: this.currentUser.publicUsername,
+                endTime: this.messages[this.messages.length-1].timestamp
               }
             );
             this.selectedConv.unseenCount = 0;
             this.defaultScrollDown = true;
           }
         ); 
+      }else{
+        this.messageService.notify(
+          {
+            type: "msg_seen", 
+            from: this.selectedConv.publicUsername, 
+            to: this.currentUser.publicUsername,
+            endTime: this.messages[this.messages.length-1].timestamp
+          }
+        );
+        this.selectedConv.unseenCount = 0;
+        this.defaultScrollDown = true;
       }
-
-      this.messageService.notify(
-        {
-          type: "msg_seen", 
-          from: this.selectedConv.publicUsername, 
-          to: this.currentUser.publicUsername
-        }
-      );
-      this.selectedConv.unseenCount = 0;
-      this.defaultScrollDown = true;
     }
   }
 
@@ -366,7 +406,14 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
     this.messageService.getMsgs(
       {from: this.selectedConv.publicUsername, pivotTime: pivotTime}, 
       (data: any) => {
-        this.messages = data;
+        this.messages = data;// messages dosconnected from selected conv
+        // this.selectedConv.messages.splice(0, this.messages.length, data); //do not implement this
+
+        setTimeout(
+          ()=> {this.togglerService.pingMessagelet.next(pivotTime);},
+          500
+        )
+        
       }  
     )
   }
@@ -388,5 +435,17 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
     this.replyToMessage = undefined;
     this.replyToPeople = undefined;
     this.addchatBoxClass ="chat-window1";
+  }
+
+  playNotifSound(){
+    const audioSrc = this.sound.audioCtx.createBufferSource();
+    audioSrc.connect(this.sound.audioCtx.destination);
+
+    if(this.sound.audioBuffer){
+      audioSrc.buffer = this.sound.audioBuffer;
+
+      audioSrc.start();
+    }
+    
   }
 }

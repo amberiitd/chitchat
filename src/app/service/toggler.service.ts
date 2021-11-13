@@ -7,4 +7,5 @@ export class TogglerService{
     public rightPaneltarget = "rightPanel";
 
     public scrollBottom = new Subject();
+    public pingMessagelet = new Subject<number>();
 }

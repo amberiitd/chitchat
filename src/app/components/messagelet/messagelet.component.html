@@ -1,15 +1,15 @@
 <div [class]="{'row': true, 'justify-content-end': toRight}">
-    <div class="col-auto px-0 " style=" position: relative; max-width: 25em;">
-        <div class="border shadow-sm p-0 px-3 py-1" [ngStyle]="!toRight?  { 'border-radius': '10px', 'border-top-left-radius': 0, 'background-color': '#fff'} : { 'border-radius': '10px', 'border-top-right-radius': 0, 'background-color': '#b0f7f7'}">
+    <div class="col-auto px-0 " style=" position: relative; max-width: 25em;"  (mouseenter)="hoverOnBody()" (mouseleave)="hoverOffBody()">
+        <div class="border shadow-sm p-0 px-1 py-1" [ngStyle]="!toRight?  { 'border-radius': '10px', 'border-top-left-radius': 0, 'background-color': bgColor} : { 'border-radius': '10px', 'border-top-right-radius': 0, 'background-color': bgColor }" >
             <!-- parent -->
-            <div *ngIf="parentMessage" class="px-2 mt-1 rounded-3 border-start border-info border-3 bg-light mb-1" style="opacity: 0.5;" (click) = "searchParentMessage()">
+            <div *ngIf="parent" class="px-2 mt-1 rounded-3 border-start border-info border-3 bg-light mb-1" style="opacity: 0.5;" (click) = "searchParentMessage()">
                 <p class="text-info mb-0" style="font-size: 90%;">{{parentSender}}</p>
                 <div class="pb-1 text-secondary" style="font-size: 75%; ">
-                    {{parentMessage.text}}
+                    {{parent.text}}
                 </div>
             </div>
 
-            <div class="" style="position: relative; padding-right: 5em;">
+            <div class=" ps-2" style="position: relative; padding-right: 5em;">
                 
                 <!-- msg body -->
                 <span style="font-size: 90%;">{{text}}</span>
@@ -25,6 +25,16 @@
                     </span>
                 </div>
             </div>
+        </div>
+        <div class="dropdown" style=" position: absolute; top: 0; right: 0;" [hidden]="!showDropDown">
+            <button class="btn py-0 bg-light" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="opacity: 0.5;">
+                <i class="bi bi-chevron-down"></i>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+              <li><a class="dropdown-item" href="#">Action</a></li>
+              <li><a class="dropdown-item" href="#">Another action</a></li>
+              <li><a class="dropdown-item" href="#">Something else here</a></li>
+            </ul>
         </div>
         <span [hidden]="!toRight" style="position: absolute; right: -8px; top: -8px;">
             <svg viewBox="0 0 8 13" width="8" height="13" class="border-top" >

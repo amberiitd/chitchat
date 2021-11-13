@@ -1,4 +1,4 @@
-<div class="row py-2">
+<div class="row gx-0 py-2">
     <div #profile class="inline-block mx-2" style="width: 3em;">
         <button class="p-0 rounded-circle border border-info" data-bs-toggle="collapse" [attr.data-bs-target]="'#'+ togglerService.rightPaneltarget" attr.aria-controls='rightPanel' style="width: 3em; height: 3em; overflow: hidden;" (click)= "toggler('userPref')">
             <img   [src]="'data:image/jpeg;base64,'+ dp" alt="dp" style="width: 3em; height: 3.5em; "/>
@@ -15,9 +15,16 @@
             <button #search class="btn" data-bs-toggle="collapse" [attr.data-bs-target]="'#'+ togglerService.rightPaneltarget" attr.aria-controls='rightPanel' (click)="toggler('searchChat')">
                 <i class="bi bi-search"></i>
             </button>
-            <button class="btn">
-                <i class="bi bi-three-dots-vertical"></i>
-            </button>
+            <span class="dropdown" style="">
+                <button class="btn " type="button" id="chatBoxTopDropdown" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="-60,0" style="" >
+                    <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="chatBoxTopDropdown">
+                    <li><a class="dropdown-item" href="#">Action</a></li>
+                    <li><a class="dropdown-item" href="#">Another action</a></li>
+                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                </ul>
+            </span>
         </div>
     </div>
 </div>

@@ -27,7 +27,7 @@ export class MessageletComponent implements OnInit, OnChanges {
   public viewed = false;
 
   @Input()
-  public parentId: number |undefined;
+  public parent: InMessage | undefined;
 
   @Input()
   public convUser: People;
@@ -39,55 +39,76 @@ export class MessageletComponent implements OnInit, OnChanges {
 
   public horizontalAlign = 'left';
 
-  public parentMessage: InMessage;
-
   public parentSender: string;
 
+  public bgColor = "inherit";
+
+  public showDropDown = false;
+
   constructor(
-    private readonly messageService: MessageService,
     private readonly togglerService: TogglerService
   ) { }
   
   ngOnInit(): void {
-
+    this.togglerService.pingMessagelet.subscribe(
+      data =>{
+        if (data === this.timestamp){
+          this.highLight();
+        }
+      }
+    )
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if(changes['from'] && changes['from'].firstChange){
-
+    if(changes['toRight'] ){
+      this.resetBg();
     }
 
     if(changes['timestamp']){
       this.formattedTime = formatTime(changes['timestamp'].currentValue);
     }
 
-    if(changes['parentId'] && changes['parentId'].currentValue > 0){
+    if(changes['parent'] && this.parent){
+      if(this.parent.from === this.convUser.publicUsername){
+        this.parentSender = this.convUser.nickName;
+      }else{
+        this.parentSender ="You";
+      }
       
-      this.messageService.getMsgs(
-        {
-          from: this.from,
-          startTime: this.parentId,
-          count: 1
-        },
-        (data: InMessage[]) =>{
-          if(data.length > 0){
-            this.parentMessage = data[0];
-            if(this.parentMessage.from === this.convUser.publicUsername){
-              this.parentSender = this.convUser.nickName;
-            }else{
-              this.parentSender ="You";
-            }
-
-            this.togglerService.scrollBottom.next();
-          }
-        }
-      )
     }
     
   }
 
   searchParentMessage(){
-    this.lookParent.emit(this.parentMessage.timestamp);
+    if (this.parent){
+      this.lookParent.emit(this.parent.timestamp);
+    }
+  }
+
+  private highLight(){
+
+    this.bgColor = '#adb5bd';
+
+    setTimeout(() =>{
+      this.resetBg()
+    }, 1000)
+  }
+
+  private resetBg(){
+    if( this.toRight){
+      this.bgColor = '#b0f7f7';
+    }else{
+      this.bgColor = '#fff';
+    }
+  }
+
+  hoverOnBody(){
+    this.showDropDown = true;
+  }
+
+  hoverOffBody(){
+    this.showDropDown = false;
+
   }
 
 }

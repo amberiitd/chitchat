@@ -37,6 +37,8 @@ export class ChatPeopleComponent implements OnInit, OnChanges {
 
   public dpString: any= "";
 
+  public showDropdown = false;
+
   constructor(
     public readonly authService: AuthService
   ) { }
@@ -53,4 +55,14 @@ export class ChatPeopleComponent implements OnInit, OnChanges {
   public onClickHandler(){
     this.onSelect.emit(this.id);
   }
+
+  hoverOnBody(){
+    this.showDropdown = true;
+  }
+
+  hoverOffBody(){
+    this.showDropdown = false;
+  }
+
+  dummy(){}
 }

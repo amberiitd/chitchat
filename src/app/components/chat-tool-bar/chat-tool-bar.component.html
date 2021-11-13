@@ -5,13 +5,21 @@
         </button>
     </div>
     <div class="col">
-        <div align="right">
+        <div class="" align="right">
             <button class="btn" data-bs-toggle = "collapse" data-bs-target=".contacts" attr.aria-controls="chatContacts chatMenu" (click)="toggleFirstColumn()">
                 <i class="bi bi-chat-text-fill"></i>
             </button>
-            <button class="btn">
-                <i class="bi bi-three-dots-vertical"></i>
-            </button>
+            <span class="dropdown" style="">
+                <button class="btn " type="button" id="chatToolDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="" >
+                    <i class="bi bi-three-dots-vertical"></i>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="chatToolDropdown">
+                    <li><a class="dropdown-item" href="#">Action</a></li>
+                    <li><a class="dropdown-item" href="#">Another action</a></li>
+                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                </ul>
+            </span>
+            
         </div>
     </div>
 </div>

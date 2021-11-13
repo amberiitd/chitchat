@@ -9,13 +9,15 @@ export interface InMessage{
     text: string;
     notViewed: boolean;
     timestamp: number;
-    parentId?: number; // timestamp for now 
+    parentId?: number;
+    parent?: InMessage; // timestamp for now 
 }
 
 export interface Notification{
     type: "msg_seen" | "";
     from: string;
     to: string;
+    endTime: number;
 }
 
 export interface MessageQuery{

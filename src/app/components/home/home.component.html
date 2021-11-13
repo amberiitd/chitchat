@@ -1,12 +1,12 @@
 <div  class="h-100">
-    <div *ngIf="authService.isAuthenticated" class="row h-100 flex-nowrap shadow" style="overflow-x: auto;">
+    <div *ngIf="authService.isAuthenticated" class="row gx-0 h-100 flex-nowrap shadow" style="overflow-x: auto;">
  
-        <div class="col-3 border  bg-white h-100 px-0" style="position: relative; min-width: 15em;">
-            <div class="row m-0 p-0 h-100 justify-content-between">
+        <div class="col-3 border  bg-white h-100 px-0" style="position: relative; min-width: 17em;">
+            <div class="row gx-0 m-0 p-0 h-100 justify-content-between">
                 <!-- profile -->
                 <div class="profile collapse collapse-horizontal text-nowrap p-0 bg-light" 
                     id = "userProfile"
-                    style="min-width: 0%; height: 90%; overflow-x: hidden">
+                    style="min-width: 0%; height: 100%; overflow-x: hidden">
                     <div class="align-items-end mb-1 mx-0" style="height: 7em; background-color: #b0f7f7;">
                         <div class="col">
                             <button class="btn" data-bs-toggle = "collapse" data-bs-target=".profile" attr.aria-controls="userProfile chatMenu" aria-expanded="false">
@@ -34,37 +34,38 @@
                 </div>
                 
                 <!-- contacts -->
-                <div class="contacts collapse collapse-horizontal text-nowrap p-0" 
+                <div class="contacts collapse collapse-horizontal text-nowrap p-0 h-100" 
                     id = "chatContacts"
-                    style="min-width: 0%;">
-                    <div class="row align-items-end mb-1 mx-0" style="height: 5.9em; background-color: #b0f7f7;">
-                        <div class="col">
-                            <button class="btn" data-bs-toggle = "collapse" data-bs-target=".contacts" attr.aria-controls="chatContacts chatMenu" aria-expanded="false">
-                                <i class="bi bi-arrow-left"></i>
-                            </button>
-                            New Chat
-                        </div>
-                    </div>
-
-                    <div class="row mb-1 bg-light mx-0">
-                        <app-search-bar class=""
-                            [placeholder] ="'Search contacts'"
-                            (onTextChange) = "onContactSearch($event)"
-                        ></app-search-bar>
-                    </div>
-
-                    <div class="" style="height: 85%">
-                        <div class="" style="height: 100%;  overflow-x: hidden; padding-right: -0.5em;">
-                            <div *ngFor="let member of searchedContacts" class="row mx-0 pe-2" [ngStyle]="{'background-color': member.style?member.style.bg: 'inherit'}">
-                                <app-chat-people
-                                    [id]= "member.publicUsername"
-                                    [name]= "member.nickName"
-                                    [dp]= "member.dp"
-                                    [viewType]= "'contact'"
-                                    [status]="member.status"
-                                    (onSelect)= "onContactSelect($event)"
-                                ></app-chat-people>
+                    style="min-width: 0%; position: relative;">
+                    <div style="position: absolute; top: 0; right: 0; left: 0;">
+                        <div class="row gx-0 align-items-end mb-1 mx-0" style="height: 7em; background-color: #b0f7f7;">
+                            <div class="col">
+                                <button class="btn" data-bs-toggle = "collapse" data-bs-target=".contacts" attr.aria-controls="chatContacts chatMenu" aria-expanded="false">
+                                    <i class="bi bi-arrow-left"></i>
+                                </button>
+                                New Chat
                             </div>
+                        </div>
+    
+                        <div class="row gx-0 mb-1 bg-light mx-0">
+                            <app-search-bar class=""
+                                [placeholder] ="'Search contacts'"
+                                (onTextChange) = "onContactSearch($event)"
+                            ></app-search-bar>
+                        </div>
+    
+                    </div>
+                    
+                    <div class="contact-list" style="height: 100%; padding-right: -0.5em;">
+                        <div *ngFor="let member of searchedContacts" class="row gx-0 mx-0 pe-2" [ngStyle]="{'background-color': member.style?member.style.bg: 'inherit'}">
+                            <app-chat-people
+                                [id]= "member.publicUsername"
+                                [name]= "member.nickName"
+                                [dp]= "member.dp"
+                                [viewType]= "'contact'"
+                                [status]="member.status"
+                                (onSelect)= "onContactSelect($event)"
+                            ></app-chat-people>
                         </div>
                     </div>
                 </div>
@@ -72,13 +73,13 @@
                 <!-- chat side menu -->
                 <div *ngIf="firstColumn === 'conv'" class="contacts profile collapse collapse-horizontal show border-end text-nowrap p-0 h-100" id="chatMenu" style="min-width: 0%; position: relative;">
                         <div class="" style="position: absolute; right: 0; left: 0">
-                            <div class="row mb-1 bg-light mx-0 py-1">
+                            <div class="row gx-0 mb-1 bg-light mx-0 py-1">
                                 <app-chat-tool-bar
                                     [dp] = "currentUser.dp"
                                     (showContacts)="toggleFirstColumn($event)"
                                 ></app-chat-tool-bar>
                             </div>
-                            <div *ngIf="connectionStatus !== 'connected'" class="row d-flex justify-content-center mb-1 bg-warning mx-0 py-auto" style="height: 4.5em;">
+                            <div *ngIf="connectionStatus !== 'connected'" class="row gx-0 d-flex justify-content-center mb-1 bg-warning mx-0 py-auto" style="height: 4.5em;">
                                 <div class="col pt-3 text-center">
                                     Connection is lost 
                                     <div class="btn rounded-pill bg-light" (click)= "refreshConnection()">
@@ -86,12 +87,12 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row mb-1 bg-light mx-0">
+                            <div class="row gx-0 mb-1 bg-light mx-0">
                                 <app-search-bar class=""
                                 [placeholder] ="'Search new chat'"
                                 ></app-search-bar>
                             </div>
-                            <!-- <div *ngIf="connectionStatus === 'connected'" class="row mb-1 bg-light mx-0 text-center py-auto">
+                            <!-- <div *ngIf="connectionStatus === 'connected'" class="row gx-0 mb-1 bg-light mx-0 text-center py-auto">
                                 <button class="btn" (click)= "disconnect()">
                                     Disconnect
                                 </button>
@@ -100,7 +101,7 @@
                     
                         <!-- people -->
                         <div class="conv-list" style="height: 100%;  overflow-x: hidden; padding-right: -0.5em;">
-                            <div *ngFor="let member of peopleList" class="row mx-0" [ngStyle]="{'background-color': member.style?member.style.bg: 'inherit'}">
+                            <div *ngFor="let member of peopleList" class="row gx-0 mx-0" [ngStyle]="{'background-color': member.style?member.style.bg: 'inherit'}">
                                 <app-chat-people
                                     [id]= "member.publicUsername"
                                     [name]= "member.nickName"
@@ -121,7 +122,7 @@
         <!-- chat column  -->
         <div class="col border bg-white h-100 px-0" style=" position: relative; min-width: 30em;">
             <!-- chat top -->
-            <div class="row border-end bg-light mx-0" style="position: absolute; top: 0; right: 0; left: 0; z-index: 3;">
+            <div class="row gx-0 border-end bg-light mx-0" style="position: absolute; top: 0; right: 0; left: 0; z-index: 3;">
                 <app-chat-box-top-bar *ngIf="selectedConv"
                     [name]="selectedConv.nickName"
                     [dp]="selectedConv.dp"
@@ -131,14 +132,14 @@
             </div>
             <!-- message window -->
             <div #scrollToEnd *ngIf="selectedConv" [class]="'px-5 '+ addchatBoxClass" style="height: 100%; overflow-y: auto; background-color: azure; " (scroll)="scrollHandler($event)">
-                <div class="row mb-2" *ngFor="let message of messages" style="height: max-content;" style="margin-bottom: 0;" (dblclick)= "replyTo(message)">
+                <div class="row gx-0 mb-2" *ngFor="let message of messages" style="height: max-content;" style="margin-bottom: 0;" (dblclick)= "replyTo(message)">
                     <app-messagelet 
                         [text]="message.text"
                         [from]="message.from"
                         [timestamp]="message.timestamp"
                         [toRight]="message.from === currentUser.publicUsername"
                         [viewed]="!message.notViewed"
-                        [parentId]= "message.parentId"
+                        [parent]= "message.parent"
                         [convUser]="selectedConv"
                         (lookParent) ="onSearchedMsgSelect($event)"
                     ></app-messagelet>
@@ -146,7 +147,7 @@
                
             </div>
             <!-- bottom msg input -->
-            <div *ngIf="selectedConv" class="row mx-0 px-0 w-100" style="position: absolute; bottom: 0; right: 0; left: 0;">
+            <div *ngIf="selectedConv" class="row gx-0 mx-0 px-0 w-100" style="position: absolute; bottom: 0; right: 0; left: 0;">
                 <app-chat-box-bot-bar class="px-0 w-100"
                     [replyToPeople]= "replyToPeople"
                     [replyToMessage]="replyToMessage"
@@ -154,9 +155,9 @@
                     (onSubmit) = "sendToUser($event)"
                 ></app-chat-box-bot-bar>
             </div>
-            <!-- <div class="row h-100 flex-nowrap">
+            <!-- <div class="row gx-0 h-100 flex-nowrap">
                 <div class="col h-100" style="position: relative;">
-                    <div class="row" style="height: 100%; padding-bottom: 4.5em;">
+                    <div class="row gx-0" style="height: 100%; padding-bottom: 4.5em;">
                         
                         
                     </div>
