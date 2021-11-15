@@ -1,0 +1,5 @@
+<div>
+    <div *ngFor="let notif of notifications" class="bg-warning rounded p-2 mb-2" style=" width: 12em;">
+        {{notif.text}} <button *ngIf="notif.undo" class= "btn" (click)= "notif.undo()">undo</button>
+    </div>
+</div>

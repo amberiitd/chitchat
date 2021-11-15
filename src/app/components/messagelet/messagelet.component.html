@@ -5,6 +5,7 @@
             <div *ngIf="parent" class="px-2 mt-1 rounded-3 border-start border-info border-3 bg-light mb-1" style="opacity: 0.5;" (click) = "searchParentMessage()">
                 <p class="text-info mb-0" style="font-size: 90%;">{{parentSender}}</p>
                 <div class="pb-1 text-secondary" style="font-size: 75%; ">
+                    
                     {{parent.text}}
                 </div>
             </div>
@@ -12,9 +13,15 @@
             <div class=" ps-2" style="position: relative; padding-right: 5em;">
                 
                 <!-- msg body -->
-                <span style="font-size: 90%;">{{text}}</span>
+                <span *ngIf="deleted" class="me-2">
+                    <i class="bi bi-info-circle"></i>
+                </span>
+                <span [ngStyle]="{'font-size': '90%', 'font-style': deleted ? 'italic': 'normal'}">{{text}}</span>
                 
                 <div style="position: absolute; right: 0; bottom: 0; font-size: 75%;">
+                    <span *ngIf="starred">
+                        <i class="bi bi-star-fill"></i>
+                    </span>
                     <span>{{formattedTime}}</span> 
 
                     <span *ngIf="toRight && !viewed">
@@ -26,14 +33,17 @@
                 </div>
             </div>
         </div>
-        <div class="dropdown" style=" position: absolute; top: 0; right: 0;" [hidden]="!showDropDown">
-            <button class="btn py-0 bg-light" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false" style="opacity: 0.5;">
+        <div class="dropdown" style=" position: absolute; top: 0; right: 0;" >
+            <button class="btn py-0 bg-light" type="button" id="messageDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="opacity: 0.5;" [hidden]="!showDropDown">
                 <i class="bi bi-chevron-down"></i>
             </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-              <li><a class="dropdown-item" href="#">Action</a></li>
-              <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
+            <ul class="dropdown-menu" aria-labelledby="messageDropdown">
+                <li><a class="dropdown-item" (click)= "actions[0].callback(timestamp)">Reply</a></li>
+                <li>
+                    <a class="dropdown-item" (click)= "actions[1].callback(timestamp)">{{starred ? 'Unstar Message': 'Star Message'}}
+                    </a>
+                </li>
+                <li *ngIf="!deleted"><a class="dropdown-item" (click)= "actions[2].callback(timestamp)">Delete</a></li>
             </ul>
         </div>
         <span [hidden]="!toRight" style="position: absolute; right: -8px; top: -8px;">

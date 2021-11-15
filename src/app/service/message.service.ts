@@ -5,6 +5,7 @@ import { isEmpty } from 'lodash';
 import { Subject, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import * as SockJS from 'sockjs-client';
+import { ActionRequest } from '../model/action.model';
 import { InMessage, MessageQuery, Notification, OutMessage } from '../model/message.model';
 import { People } from '../model/people.model';
 import { AuthService } from './auth.service';
@@ -105,6 +106,22 @@ export class MessageService {
             })
         )
         .subscribe( res =>{});
+    }
+
+    updateMessage(action: ActionRequest, callBack: () => void) {
+        const options = {
+            headers : {
+                'Authorization': 'Basic '+ this.authService.getAuthToken()
+            }
+        }
+        this.http.post(this.api +"/msg-action", action, options)
+        .pipe(
+            catchError(error =>{
+                console.log(error);
+                return throwError(error);
+            })
+        )
+        .subscribe( res =>{callBack()});
     }
   
 } 

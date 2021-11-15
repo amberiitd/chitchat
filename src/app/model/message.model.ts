@@ -8,6 +8,8 @@ export interface InMessage{
     from: string;
     text: string;
     notViewed: boolean;
+    deleted: boolean;
+    starred: boolean,
     timestamp: number;
     parentId?: number;
     parent?: InMessage; // timestamp for now 
@@ -35,5 +37,7 @@ export const defaultInMessage: InMessage = {
     from: "",
     text: "",
     notViewed: false,
+    deleted: false,
+    starred: false,
     timestamp: 0,
 }

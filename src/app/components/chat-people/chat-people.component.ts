@@ -25,7 +25,7 @@ export class ChatPeopleComponent implements OnInit, OnChanges {
   public dp: Blob = new Blob();
 
   @Input()
-  public viewType: 'conv' | 'contact' = 'conv';
+  public viewType: 'conv' | 'contact' |'newContact' = 'conv';
 
   @Input()
   public status: string = "";
@@ -37,7 +37,7 @@ export class ChatPeopleComponent implements OnInit, OnChanges {
 
   public dpString: any= "";
 
-  public showDropdown = false;
+  public showOnHover = false;
 
   constructor(
     public readonly authService: AuthService
@@ -57,11 +57,11 @@ export class ChatPeopleComponent implements OnInit, OnChanges {
   }
 
   hoverOnBody(){
-    this.showDropdown = true;
+    this.showOnHover = true;
   }
 
   hoverOffBody(){
-    this.showDropdown = false;
+    this.showOnHover = false;
   }
 
   dummy(){}

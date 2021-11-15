@@ -7,8 +7,8 @@
                 <div class="profile collapse collapse-horizontal text-nowrap p-0 bg-light" 
                     id = "userProfile"
                     style="min-width: 0%; height: 100%; overflow-x: hidden">
-                    <div class="align-items-end mb-1 mx-0" style="height: 7em; background-color: #b0f7f7;">
-                        <div class="col">
+                    <div class="align-items-end mb-1 mx-0" style="position: absolute; top: 0; right: 0; left: 0; z-index: 1000;" >
+                        <div class="col" style="height: 7em; background-color: #b0f7f7;">
                             <button class="btn" data-bs-toggle = "collapse" data-bs-target=".profile" attr.aria-controls="userProfile chatMenu" aria-expanded="false">
                                 <i class="bi bi-arrow-left"></i>
                             </button>
@@ -16,7 +16,7 @@
                         </div>
                     </div>
 
-                    <div class="py-2 mb-1" style="padding-left: 20%; overflow-x: hidden;">
+                    <div class="pb-2 mb-1" style="padding-left: 20%; padding-top: 8em; overflow-x: hidden;">
                         <div class="border rounded-circle" style="width: 12em; height: 12em; overflow: hidden;">
                             <img [src]="'data:image/jpeg;base64,'+ currentUser.dp" alt="image" style="width: 10em; height: 13em;">
                         </div>
@@ -34,10 +34,10 @@
                 </div>
                 
                 <!-- contacts -->
-                <div class="contacts collapse collapse-horizontal text-nowrap p-0 h-100" 
+                <div class="contacts collapse collapse-horizontal text-nowrap p-0 px-2 h-100" 
                     id = "chatContacts"
                     style="min-width: 0%; position: relative;">
-                    <div style="position: absolute; top: 0; right: 0; left: 0;">
+                    <div style="position: absolute; top: 0; right: 0; left: 0; z-index: 1000;">
                         <div class="row gx-0 align-items-end mb-1 mx-0" style="height: 7em; background-color: #b0f7f7;">
                             <div class="col">
                                 <button class="btn" data-bs-toggle = "collapse" data-bs-target=".contacts" attr.aria-controls="chatContacts chatMenu" aria-expanded="false">
@@ -47,7 +47,7 @@
                             </div>
                         </div>
     
-                        <div class="row gx-0 mb-1 bg-light mx-0">
+                        <div class="row gx-0 mb-1 bg-light mx-0 px-2">
                             <app-search-bar class=""
                                 [placeholder] ="'Search contacts'"
                                 (onTextChange) = "onContactSearch($event)"
@@ -57,7 +57,7 @@
                     </div>
                     
                     <div class="contact-list" style="height: 100%; padding-right: -0.5em;">
-                        <div *ngFor="let member of searchedContacts" class="row gx-0 mx-0 pe-2" [ngStyle]="{'background-color': member.style?member.style.bg: 'inherit'}">
+                        <div *ngFor="let member of searchedContacts" class="row gx-0 mx-0 pe-2" >
                             <app-chat-people
                                 [id]= "member.publicUsername"
                                 [name]= "member.nickName"
@@ -68,12 +68,20 @@
                             ></app-chat-people>
                         </div>
                     </div>
+                    
+                    <!-- add new contacts -->
+                    <div class="shadow input-group rounded-pill border-info flex-nowrap me-2" [ngStyle]="{'position': 'absolute', 'left': '2em', 'bottom': '2em', 'width': newContact.showInput? '80%': '4em'}">
+                        <button class="btn btn-info rounded-circle py-2" (click) = "newContact.showInput = !newContact.showInput; addNewContact()">
+                            <i class="bi bi-plus"></i>
+                        </button>
+                        <input class="form-control border-0 rounded-pill" type="text" placeholder="Add new contact" [(ngModel)]="newContact.publicUsername" [hidden]= "!newContact.showInput" />
+                    </div>
                 </div>
 
                 <!-- chat side menu -->
-                <div *ngIf="firstColumn === 'conv'" class="contacts profile collapse collapse-horizontal show border-end text-nowrap p-0 h-100" id="chatMenu" style="min-width: 0%; position: relative;">
-                        <div class="" style="position: absolute; right: 0; left: 0">
-                            <div class="row gx-0 mb-1 bg-light mx-0 py-1">
+                <div *ngIf="firstColumn === 'conv'" class="contacts profile collapse collapse-horizontal show border-end text-nowrap p-0 px-2 h-100" id="chatMenu" style="min-width: 0%; position: relative;">
+                        <div class="" style="position: absolute; right: 0; left: 0; z-index: 999;">
+                            <div class="row gx-0 mb-1 bg-light mx-0 py-1 px-2">
                                 <app-chat-tool-bar
                                     [dp] = "currentUser.dp"
                                     (showContacts)="toggleFirstColumn($event)"
@@ -87,7 +95,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row gx-0 mb-1 bg-light mx-0">
+                            <div class="row gx-0 mb-1 bg-light mx-0 px-2">
                                 <app-search-bar class=""
                                 [placeholder] ="'Search new chat'"
                                 ></app-search-bar>
@@ -132,14 +140,17 @@
             </div>
             <!-- message window -->
             <div #scrollToEnd *ngIf="selectedConv" [class]="'px-5 '+ addchatBoxClass" style="height: 100%; overflow-y: auto; background-color: azure; " (scroll)="scrollHandler($event)">
-                <div class="row gx-0 mb-2" *ngFor="let message of messages" style="height: max-content;" style="margin-bottom: 0;" (dblclick)= "replyTo(message)">
+                <div class="row gx-0 mb-2" *ngFor="let message of messages" style="height: max-content;" style="margin-bottom: 0;" (dblclick)= "replyTo(message.timestamp)">
                     <app-messagelet 
                         [text]="message.text"
                         [from]="message.from"
                         [timestamp]="message.timestamp"
                         [toRight]="message.from === currentUser.publicUsername"
                         [viewed]="!message.notViewed"
+                        [deleted]="message.deleted"
+                        [starred]="message.starred"
                         [parent]= "message.parent"
+                        [actions]="messageletActions"
                         [convUser]="selectedConv"
                         (lookParent) ="onSearchedMsgSelect($event)"
                     ></app-messagelet>
@@ -179,4 +190,43 @@
         <app-login-page></app-login-page>
     </div>
       
+    <ng-template #alertModal>
+ 
+        <div class="modal-header">
+          <h5 class="modal-title" id="alertModal">{{alert.actionName+ ' ' + alert.target}}?</h5>
+          <!-- <button type="button" class="btn-close"></button> -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click) = "modalService.hide(); alert.fallback()">Cancel</button>
+          <button *ngFor="let option of alert.options" type="button" class="btn btn-primary mx-2" (click) = "option.call(); modalService.hide() ">{{option.name}}</button>
+        </div>
+    </ng-template>
+
+    <ng-template #newContactModal>
+ 
+        <div class="modal-header">
+          <h5 class="modal-title" id="alertModal">Result</h5>
+          <!-- <button type="button" class="btn-close"></button> -->
+        </div>
+        <div *ngIf="newContact.result" class="modal-body">
+            <div class="">
+                <app-chat-people
+                    [id]= "newContact.result.publicUsername"
+                    [name]= "newContact.result.nickName"
+                    [dp]= "newContact.result.dp"
+                    [viewType]= "'newContact'"
+                    [status]="newContact.result.status"
+                ></app-chat-people>
+            </div>
+        </div>
+
+        <div *ngIf="!newContact.result"  class="modal-body">
+            <p> Not found</p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click) = "modalService.hide(); newContact.fallback()">Cancel</button>
+          <button *ngIf="newContact.result" type="button" class="btn btn-primary mx-2" (click) = "modalService.hide(); newContact.add()">Add</button>
+        </div>
+    </ng-template>
   </div>

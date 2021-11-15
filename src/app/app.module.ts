@@ -17,6 +17,9 @@ import { DataService } from './service/data.service';
 import { LoginPageComponent } from './components/login-page/login-page.component';
 import { RightPanelComponent } from './components/right-panel/right-panel.component';
 import { TogglerService } from './service/toggler.service';
+import { NotificationComponent } from './components/notification/notification.component';
+import { NotificationService } from './service/notification.service';
+import { BsModalService } from 'ngx-bootstrap/modal';
 
 @NgModule({
   declarations: [
@@ -29,14 +32,15 @@ import { TogglerService } from './service/toggler.service';
     ChatBoxTopBarComponent,
     ChatBoxBotBarComponent,
     LoginPageComponent,
-    RightPanelComponent
+    RightPanelComponent,
+    NotificationComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpClientModule
   ],
-  providers: [MessageService, AuthService, DataService, TogglerService],
+  providers: [MessageService, AuthService, DataService, TogglerService, NotificationService, BsModalService ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

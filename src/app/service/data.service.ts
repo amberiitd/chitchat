@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { throwError } from "rxjs";
 import { catchError } from 'rxjs/operators'
-import { People } from "../model/people.model";
+import { People, PeopleDTO } from "../model/people.model";
 import { User } from "../model/User.model";
 import { AuthService } from "./auth.service";
 
@@ -44,7 +44,7 @@ export class DataService{
                 'Authorization': "Basic "+ this.authService.getAuthToken()
             }
         }
-        this.http.get<Array<People>>(this.api + "/contacts", options)
+        this.http.get<Array<PeopleDTO>>(this.api + "/contacts", options)
         .pipe(
             catchError(
                 (error: any) => {
@@ -103,5 +103,54 @@ export class DataService{
                 callBack(data);
             }
         )
+    }
+
+    
+    findPeople(publicUsername: string, callback: (data: PeopleDTO) => void) {
+        const options= {
+            headers: {
+                'Authorization': "Basic "+ this.authService.getAuthToken()
+            },
+            params: {
+                'publicUsername': publicUsername,
+            }
+        }
+        this.http.get<PeopleDTO>(this.api + "/people", options)
+        .pipe(
+            catchError(
+                (error: any) => {
+                    console.log(error);
+                    return throwError(error)
+                }
+            )
+        )
+        .subscribe(
+            res => {callback(res)}
+        );
+    }
+
+    
+    addContact(publicUsername: string, nickName: string, callback: () => void) {
+        const options= {
+            headers: {
+                'Authorization': "Basic "+ this.authService.getAuthToken()
+            },
+            params: {
+                publicUsername: publicUsername,
+                nickName: nickName
+            }
+        }
+        this.http.post<PeopleDTO>(this.api + "/add-contact", {}, options)
+        .pipe(
+            catchError(
+                (error: any) => {
+                    console.log(error);
+                    return throwError(error)
+                }
+            )
+        )
+        .subscribe(
+            res => {callback()}
+        );   
     }
 }

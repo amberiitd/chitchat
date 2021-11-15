@@ -36,8 +36,9 @@
     margin-top: 10em;
 }
 .contact-list{
-    overflow-y: auto;
+    overflow-x: hidden;
     padding-top: 10em;
+    padding-bottom: 7em;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -58,4 +59,11 @@
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
+}
+
+.form-control, .btn:focus {
+    color: #212529;
+    /* background-color: #fff; */
+    outline: 0;
+    box-shadow: none;
 }

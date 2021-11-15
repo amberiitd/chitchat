@@ -1,8 +1,14 @@
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, OnInit, Output, ViewChild } from '@angular/core';
+import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { isEmpty } from 'lodash';
+import { BsModalService } from 'ngx-bootstrap/modal';
+import { timestamp } from 'rxjs/operators';
+import { Action, ActionRequest } from 'src/app/model/action.model';
+import { UIAlert } from 'src/app/model/notification.model';
 import { defaultUser, User } from 'src/app/model/User.model';
 import { AuthService } from 'src/app/service/auth.service';
 import { DataService } from 'src/app/service/data.service';
+import { NotificationService } from 'src/app/service/notification.service';
 import { TogglerService } from 'src/app/service/toggler.service';
 import { formatTime } from 'src/app/util/util-method';
 import { OutMessage, InMessage, defaultInMessage } from '../../model/message.model';
@@ -18,7 +24,16 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
 
   @ViewChild('scrollToEnd') private myScrollContainer: ElementRef;
   @ViewChild('rightPanel') private rightPanel: ElementRef;
+  @ViewChild('alertModal')
+  public alertModal: TemplateRef<any>;
 
+  @ViewChild('newContactModal')
+  public newContactModal: TemplateRef<any>;
+
+  public alert: UIAlert;
+
+
+  public messageletActions : Array<Action> =[];
 
   public currentUser: User = defaultUser;
   public msgList: Array<InMessage>= [];
@@ -36,17 +51,33 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
 
   public selectedConv: any;
   public connectionStatus: 'disconnected' | 'connected' | 'loading' = 'loading';
-  public firstColumn: 'conv' | 'contact' = 'conv';
-  public contacts: Array<People> = [];
-  public searchedContacts: Array<People> = [];
+  public firstColumn: 'conv' | 'contact'= 'conv';
+  public contacts: Array<PeopleDTO> = [];
+  public searchedContacts: Array<PeopleDTO> = [];
 
   public messages: Array<InMessage> = [];
+  public selectedMessageStamps: Array<number> =[];
   public msgSearchResult: Array<InMessage> = [];
   public rightPanelViewType: 'searchChat' | 'userPref' = 'searchChat';
 
   public replyToMessage: InMessage | undefined;
   public replyToPeople: string | undefined;
   public addchatBoxClass:"chat-window1" | "chat-window2"  = "chat-window1";
+
+  public newContact: {
+    showInput: boolean;
+    publicUsername: string;
+    nickName: string;
+    fallback: () => void;
+    add: ()=> void;
+    result?: PeopleDTO;
+  } = {
+    showInput: false,
+    publicUsername: "",
+    nickName: "",
+    fallback: ()=> {},
+    add: () => {}
+  };
   
   public formatTime = formatTime;
 
@@ -54,7 +85,9 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
     private readonly messageService: MessageService,
     private readonly dataService: DataService,
     public readonly authService: AuthService,
-    public readonly togglerService: TogglerService
+    public readonly togglerService: TogglerService,
+    public readonly notifService: NotificationService,
+    public readonly modalService: BsModalService
   ) {   }
   
 
@@ -93,6 +126,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
     //     this.defaultScrollDown = true;
     //   }
     // )
+    this.initActions();
 
     this.dataService.getNotifSound(
       async (data: Blob) => {
@@ -182,6 +216,38 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
     )
   }
 
+  initActions(){
+    this.messageletActions =   [
+      {
+        idx: 0,
+        name: 'Reply',
+        callback: (data) =>{
+          this.replyTo(data);
+        }
+      },
+      {
+        idx: 1,
+        name: 'Star Message',
+        callback: (data) =>{
+          this.pushToSelected(data);
+          this.updateMessage("star");
+        }
+      },
+      {
+        idx: 2,
+        name: 'Delete Message',
+        callback: (data) =>{
+          this.pushToSelected(data);
+          this.updateMessage("delete");
+        }
+      },
+    ]
+
+    this.messageletActions.forEach(action =>{
+      action.callback = action.callback.bind(this);
+    })
+  }
+
   disconnect(){
     this.messageService.disconnect();
   }
@@ -224,6 +290,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
     }
     else if ((data.type === 'message' && data.msgText && !isEmpty(data.msgText.trim()))){
       const inMsg: InMessage = {
+        ...defaultInMessage,
         type: 'message',
         from: this.currentUser.publicUsername,
         text: data.msgText?? "",
@@ -282,17 +349,21 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
             this.messages.push(...data.slice(1));
           }  
         )
-      }else{
+      }else {
         this.messages = this.selectedConv.messages;
-        this.messageService.notify(
-          {
-            type: "msg_seen", 
-            from: this.selectedConv.publicUsername, 
-            to: this.currentUser.publicUsername,
-            endTime: this.messages[this.messages.length-1].timestamp
-          }
-        );
-        this.selectedConv.unseenCount = 0;
+
+        if (this.selectedConv.unseenCount > 0){
+          this.messageService.notify(
+            {
+              type: "msg_seen", 
+              from: this.selectedConv.publicUsername, 
+              to: this.currentUser.publicUsername,
+              endTime: this.messages[this.messages.length-1].timestamp
+            }
+          );
+          this.selectedConv.unseenCount = 0;
+        }
+        
       }
       
     }else if(this.myScrollContainer.nativeElement.scrollTop === 0){
@@ -376,7 +447,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
   toggleFirstColumn(event: any){
     this.dataService.getContacts( (data: any) =>{
       this.contacts = data
-      this.searchedContacts =[...this.contacts]
+      this.searchedContacts =this.contacts;
     });
   }
 
@@ -386,7 +457,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
 
   onContactSearch(text: string){
     if(text === ''){
-      this.searchedContacts = [...this.contacts];
+      this.searchedContacts = this.contacts;
     }else{
       this.searchedContacts = this.contacts.filter(contact => contact.nickName.toLocaleLowerCase().includes(text.toLocaleLowerCase()))
     
@@ -418,10 +489,11 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
     )
   }
 
-  replyTo(msg: InMessage){
+  replyTo(timestamp: number){
+    const msg = this.messages.find(m => m.timestamp === timestamp);
     this.replyToMessage = msg;
 
-    if (msg.from === this.currentUser.publicUsername){
+    if (msg && msg.from === this.currentUser.publicUsername){
       this.replyToPeople = "You"
     }else{
       this.replyToPeople = this.selectedConv.nickName;
@@ -446,6 +518,136 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
 
       audioSrc.start();
     }
+    
+  }
+
+  pushToSelected(timestamp: number){
+    this.selectedMessageStamps.push(timestamp);    
+  }
+
+  updateMessage(actionName: string){
+    const selectedCount = this.selectedMessageStamps.length;
+
+    const commonCallback = (() =>{
+      this.selectedMessageStamps.forEach(
+        timestamp => {
+          const index = this.messages.findIndex(m => m.timestamp === timestamp);
+          if(index >=0){
+            if(actionName === 'star'){
+              this.messages[index].starred = !this.messages[index].starred;
+              // this.messages.splice(index, 1, this.messages[index]);
+            }
+            if (actionName === 'delete'){
+              this.messages[index].deleted = true;
+              this.messages[index].text ="This message is deleted"
+            }
+          }
+        }
+      )
+      this.selectedMessageStamps =[];
+    }).bind(this);
+
+    const commonFallback = (
+      () =>{
+        this.selectedMessageStamps =[];
+      } 
+    ).bind(this);
+
+    
+    const action : ActionRequest ={
+      name: actionName,
+      timestamps: [...this.selectedMessageStamps]
+    }
+
+    if (actionName === 'star'){
+      this.messageService.updateMessage(
+        action,
+        ()=>{
+          this.notifService.notificationSubject.next({
+            actionname: 'starred',
+            target: 'message',
+            targetCount: selectedCount,
+            // undo : () => {
+            //   this.messageService.updateMessage(
+            //     action,
+            //     () => {}
+            //   )
+            // }
+          });
+
+          commonCallback();
+        }
+      )
+    }else if (actionName === 'delete'){
+      const alert: UIAlert = {
+        actionName: 'Delete',
+        target: 'message',
+        fallback: commonFallback,
+        options: [
+          {
+            name: 'Delete for me',
+            call: () => {
+              this.messageService.updateMessage(
+                action,
+                ()=>{
+                  this.notifService.notificationSubject.next({
+                    actionname: 'deleted',
+                    target: 'message',
+                    targetCount: selectedCount
+                  })
+                  commonCallback();
+                }
+              )
+            }
+          }
+        ]
+      };
+
+      alert.options.forEach(
+        option => {
+          option.call = option.call.bind(this);
+        }
+      )
+
+      this.alert = alert;
+      this.modalService.show(this.alertModal, {animated: false});
+    }
+
+    
+  }
+
+  addNewContact(){
+    if (isEmpty(this.newContact.publicUsername)){
+      return;
+    }
+
+    this.dataService.findPeople(this.newContact.publicUsername, 
+      (data: PeopleDTO)=> {
+
+        if(data){
+          this.newContact.result = data;
+          this.newContact.nickName = data.nickName;
+          this.newContact.add= ()=> {
+            this.dataService.addContact(this.newContact.publicUsername, this.newContact.nickName, () => {
+              if(this.newContact.result){
+                this.contacts.push(this.newContact.result);
+                this.notifService.notificationSubject.next({
+                  actionname: 'added',
+                  target: 'contact',
+                  targetCount: 1
+                })
+                this.newContact.fallback();
+              }
+            })
+          };
+        }
+        this.newContact.fallback = ()=>{
+          this.newContact.publicUsername ="";
+        }
+        
+        this.modalService.show(this.newContactModal, {animated: false});
+      });
+
     
   }
 }

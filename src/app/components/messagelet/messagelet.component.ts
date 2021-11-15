@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Action } from 'src/app/model/action.model';
 import { defaultInMessage, InMessage } from 'src/app/model/message.model';
 import { People } from 'src/app/model/people.model';
 import { MessageService } from 'src/app/service/message.service';
@@ -27,10 +28,19 @@ export class MessageletComponent implements OnInit, OnChanges {
   public viewed = false;
 
   @Input()
+  public deleted = false;
+
+  @Input()
+  public starred = false;
+
+  @Input()
   public parent: InMessage | undefined;
 
   @Input()
   public convUser: People;
+
+  @Input()
+  public actions: ReadonlyArray<Action> = [];
 
   @Output()
   public lookParent= new EventEmitter<any>();
