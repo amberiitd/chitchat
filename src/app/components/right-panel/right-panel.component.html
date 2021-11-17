@@ -1,15 +1,13 @@
 <div>
     <div *ngIf="viewType === 'searchChat' ">
-        <div class="row m-0 mb-1 bg-light w-100">
-            <div class="row py-2 flex-nowrap">
-                <div class="col-4">
-                    <button class="btn" data-bs-toggle="collapse" data-bs-target="#rightPanel" attr.aria-controls='rightPanel' (click) ="togglerService.rightPaneltarget= 'rightPanel'; togglerService.showRightPanel = false">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </div>
-                <div class="col cut-text ">
-                    Search Messages
-                </div>
+        <div class="row m-0 mb-1 py-2 bg-light flex-nowrap">
+            <div class="col-auto">
+                <button class="btn" data-bs-toggle="collapse" data-bs-target="#rightPanel" attr.aria-controls='rightPanel' (click) ="togglerService.rightPaneltarget= 'rightPanel'; togglerService.showRightPanel = false">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="col cut-text ">
+                Search Messages
             </div>
         </div>
         <div class="row m-0 mb-2 py-1 bg-light w-100">
@@ -42,9 +40,15 @@
             </div>
         </div>
 
-        <div class="row p-2 w-100 mb-1 shadow-sm" style="overflow: hidden">
-            <div class="col-auto mx-auto border rounded-circle" style="width: 12em; height: 12em; overflow: hidden;">
+        <!-- <div class="row p-2 px-auto mb-1 shadow-sm" style="overflow: hidden">
+            <div class="border rounded-circle" style="width: 12em; height: 12em; overflow: hidden;">
                 <img [src]="'data:image/jpeg;base64,'+ selectedConv.dp" alt="image" style="width: 10em; height: 13em;">
+            </div>
+        </div > -->
+
+        <div class="py-3  mb-1 shadow-sm">
+            <div class="mx-auto border rounded-circle" style="width: 12em; height: 12em; overflow: hidden;">
+                <img  [src]="'data:image/jpeg;base64,'+ selectedConv.dp" alt="image" style="width: 10em; height: 13em; margin-left: 1em;">
             </div>
         </div >
     </div>

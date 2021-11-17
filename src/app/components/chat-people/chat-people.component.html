@@ -12,7 +12,7 @@
                 {{name}}
             </h6>
             <p *ngIf="viewType !== 'conv'" class="m-0 pb-0 cut-text" style="font-size: 90%;">
-                {{status}}
+                {{status? status: 'Hi there, I am using Chitchat'}}
             </p>
             <div *ngIf="viewType === 'conv' && lastMessage" class="cut-text"  style="width: 90%;">
                 <span style="font-size: 75%;">
@@ -28,16 +28,20 @@
             {{lastMsgtime}}
         </div>
         <div class="d-flex flex-nowrap" align="right">
+            <i  *ngIf="pinned > 0" class="bi bi-pin-angle-fill me-1"  (click)= "onClickHandler()" style="opacity: 0.7; font-size: 90%;"></i>
             <i class="bi bi-volume-mute-fill me-2"  (click)= "onClickHandler()" style="opacity: 0.7;"></i>
             <span *ngIf="unseenCount > 0" class="badge rounded-pill bg-success"  (click)= "onClickHandler()">{{unseenCount}}</span>
             <div class="dropdown" style="margin-top: -4px;">
-                <button class="btn py-0" type="button" id="convDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="opacity: 0.5;" [hidden]= "!showOnHover" (click)="dummy()">
+                <button class="btn py-0 px-0" type="button" id="convDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="opacity: 0.5;" [hidden]= "!showOnHover" (click)="dummy()">
                     <i class="bi bi-chevron-down"></i>
                 </button>
-                <ul class="dropdown-menu" aria-labelledby="convDropdown">
-                    <li><a class="dropdown-item" href="#">Action</a></li>
-                    <li><a class="dropdown-item" href="#">Another action</a></li>
-                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                <ul class="dropdown-menu shadow" aria-labelledby="convDropdown">
+                    <li><a class="dropdown-item" (click)= "actions[0].callback(id)">{{actions[0].name}}</a></li>
+                    <li>
+                        <a class="dropdown-item" (click)= "actions[1].callback(id)">{{pinned ? 'Unpin Chat': 'Pin Chat'}}
+                        </a>
+                    </li>
+                    <li><a class="dropdown-item" (click)= "actions[2].callback(id)">{{unseenCount > 0? 'Mark as read': 'Mark as unread'}}</a></li>
                 </ul>
             </div>
         </div>   

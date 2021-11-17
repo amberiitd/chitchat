@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Action } from 'src/app/model/action.model';
 
 @Component({
   selector: 'app-chat-tool-bar',
@@ -9,6 +10,9 @@ export class ChatToolBarComponent implements OnInit {
 
   @Input()
   public dp: Blob = new Blob();
+
+  @Input()
+  public actions: ReadonlyArray<Action> =[];
   
   @Output()
   public showContacts = new EventEmitter<any>();

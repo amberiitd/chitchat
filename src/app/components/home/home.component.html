@@ -6,9 +6,9 @@
                 <!-- profile -->
                 <div class="profile collapse collapse-horizontal text-nowrap p-0 bg-light" 
                     id = "userProfile"
-                    style="min-width: 0%; height: 100%; overflow-x: hidden">
-                    <div class="align-items-end mb-1 mx-0" style="position: absolute; top: 0; right: 0; left: 0; z-index: 1000;" >
-                        <div class="col" style="height: 7em; background-color: #b0f7f7;">
+                    style="position: absolute; left: 0; min-width: 0%; height: 100%; overflow-x: hidden; z-index: 101;">
+                    <div class="row gx-0 align-items-end mb-1 mx-0" style="height: 7em; background-color: #b0f7f7;" >
+                        <div class="col" >
                             <button class="btn" data-bs-toggle = "collapse" data-bs-target=".profile" attr.aria-controls="userProfile chatMenu" aria-expanded="false">
                                 <i class="bi bi-arrow-left"></i>
                             </button>
@@ -16,9 +16,9 @@
                         </div>
                     </div>
 
-                    <div class="pb-2 mb-1" style="padding-left: 20%; padding-top: 8em; overflow-x: hidden;">
+                    <div class="py-2 mb-1" style="padding-left: 20%; overflow-x: hidden;">
                         <div class="border rounded-circle" style="width: 12em; height: 12em; overflow: hidden;">
-                            <img [src]="'data:image/jpeg;base64,'+ currentUser.dp" alt="image" style="width: 10em; height: 13em;">
+                            <img [src]="'data:image/jpeg;base64,'+ currentUser.dp" alt="image" style="width: 10em; height: 13em; margin-left: 1em;">
                         </div>
                     </div >
 
@@ -34,56 +34,61 @@
                 </div>
                 
                 <!-- contacts -->
-                <div class="contacts collapse collapse-horizontal text-nowrap p-0 px-2 h-100" 
+                <div class="contacts collapse collapse-horizontal text-nowrap p-0 h-100 bg-white" 
                     id = "chatContacts"
-                    style="min-width: 0%; position: relative;">
-                    <div style="position: absolute; top: 0; right: 0; left: 0; z-index: 1000;">
-                        <div class="row gx-0 align-items-end mb-1 mx-0" style="height: 7em; background-color: #b0f7f7;">
-                            <div class="col">
-                                <button class="btn" data-bs-toggle = "collapse" data-bs-target=".contacts" attr.aria-controls="chatContacts chatMenu" aria-expanded="false">
-                                    <i class="bi bi-arrow-left"></i>
-                                </button>
-                                New Chat
+                    style="position: absolute; left: 0; min-width: 0%; z-index: 101;">
+                    <div class="w-100 px-2 h-100" style="position: relative;">
+                        <div style="position: absolute; top: 0; right: 0; left: 0; z-index: 102;">
+                            <div class="row gx-0 align-items-end mb-1 mx-0" style="height: 7em; background-color: #b0f7f7;">
+                                <div class="col">
+                                    <button class="btn" data-bs-toggle = "collapse" data-bs-target=".contacts" attr.aria-controls="chatContacts chatMenu" aria-expanded="false">
+                                        <i class="bi bi-arrow-left"></i>
+                                    </button>
+                                    New Chat
+                                </div>
                             </div>
+        
+                            <div class="row gx-0 mb-1 bg-light mx-0 px-2">
+                                <app-search-bar class=""
+                                    [placeholder] ="'Search contacts'"
+                                    (onTextChange) = "onContactSearch($event)"
+                                ></app-search-bar>
+                            </div>
+        
                         </div>
-    
-                        <div class="row gx-0 mb-1 bg-light mx-0 px-2">
-                            <app-search-bar class=""
-                                [placeholder] ="'Search contacts'"
-                                (onTextChange) = "onContactSearch($event)"
-                            ></app-search-bar>
+                        
+                        <div class="contact-list" style="height: 100%; padding-right: -0.5em;">
+                            <div *ngFor="let member of searchedContacts" class="row gx-0 mx-0 pe-2" >
+                                <app-chat-people
+                                    [id]= "member.publicUsername"
+                                    [name]= "member.nickName"
+                                    [dp]= "member.dp"
+                                    [viewType]= "'contact'"
+                                    [status]="member.status"
+                                    (onSelect)= "onContactSelect($event)"
+                                ></app-chat-people>
+                            </div>
+                            
                         </div>
-    
-                    </div>
+
+                        <!-- add new contacts -->
+                        <div class="shadow input-group rounded-pill border-info flex-nowrap me-2" [ngStyle]="{'position': 'absolute', 'left': '2em', 'bottom': '2em', 'width': newContact.showInput? '80%': '4em'}">
+                            <button class="btn btn-info rounded-circle py-2" (click) = "newContact.showInput = !newContact.showInput; addNewContact()">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                            <input class="form-control border-0 rounded-pill" type="text" placeholder="Add new contact" [(ngModel)]="newContact.publicUsername" [hidden]= "!newContact.showInput" />
+                        </div>
                     
-                    <div class="contact-list" style="height: 100%; padding-right: -0.5em;">
-                        <div *ngFor="let member of searchedContacts" class="row gx-0 mx-0 pe-2" >
-                            <app-chat-people
-                                [id]= "member.publicUsername"
-                                [name]= "member.nickName"
-                                [dp]= "member.dp"
-                                [viewType]= "'contact'"
-                                [status]="member.status"
-                                (onSelect)= "onContactSelect($event)"
-                            ></app-chat-people>
-                        </div>
-                    </div>
-                    
-                    <!-- add new contacts -->
-                    <div class="shadow input-group rounded-pill border-info flex-nowrap me-2" [ngStyle]="{'position': 'absolute', 'left': '2em', 'bottom': '2em', 'width': newContact.showInput? '80%': '4em'}">
-                        <button class="btn btn-info rounded-circle py-2" (click) = "newContact.showInput = !newContact.showInput; addNewContact()">
-                            <i class="bi bi-plus"></i>
-                        </button>
-                        <input class="form-control border-0 rounded-pill" type="text" placeholder="Add new contact" [(ngModel)]="newContact.publicUsername" [hidden]= "!newContact.showInput" />
                     </div>
                 </div>
 
-                <!-- chat side menu -->
-                <div *ngIf="firstColumn === 'conv'" class="contacts profile collapse collapse-horizontal show border-end text-nowrap p-0 px-2 h-100" id="chatMenu" style="min-width: 0%; position: relative;">
-                        <div class="" style="position: absolute; right: 0; left: 0; z-index: 999;">
+                <!-- chat side menu collapse collapse-horizontal show contacts profile id="chatMenu" -->
+                <div *ngIf="firstColumn === 'conv'" class="p-0 h-100" style="min-width: 0%; position: relative;">
+                        <div class="" style="position: absolute; right: 0; left: 0; z-index: 100;">
                             <div class="row gx-0 mb-1 bg-light mx-0 py-1 px-2">
                                 <app-chat-tool-bar
                                     [dp] = "currentUser.dp"
+                                    [actions]= "chatToolBarActions"
                                     (showContacts)="toggleFirstColumn($event)"
                                 ></app-chat-tool-bar>
                             </div>
@@ -108,15 +113,17 @@
                         </div>
                     
                         <!-- people -->
-                        <div class="conv-list" style="height: 100%;  overflow-x: hidden; padding-right: -0.5em;">
+                        <div class="conv-list px-0" style="height: 100%;  overflow-x: hidden;">
                             <div *ngFor="let member of peopleList" class="row gx-0 mx-0" [ngStyle]="{'background-color': member.style?member.style.bg: 'inherit'}">
-                                <app-chat-people
+                                <app-chat-people class="px-2"
                                     [id]= "member.publicUsername"
                                     [name]= "member.nickName"
                                     [dp]= "member.dp"
                                     [unseenCount]="member.unseenCount"
                                     [lastMessage] = "member.lastMessage"
                                     [viewType]= "'conv'"
+                                    [pinned]= "member.pinned"
+                                    [actions] = "convActions"
                                     (onSelect)= "onConvSelect($event)"
                                 ></app-chat-people>
                             </div>
@@ -130,11 +137,13 @@
         <!-- chat column  -->
         <div class="col border bg-white h-100 px-0" style=" position: relative; min-width: 30em;">
             <!-- chat top -->
-            <div class="row gx-0 border-end bg-light mx-0" style="position: absolute; top: 0; right: 0; left: 0; z-index: 3;">
+            <div class="row gx-0 border-end bg-light mx-0" style="position: absolute; top: 0; right: 0; left: 0; z-index: 99;">
                 <app-chat-box-top-bar *ngIf="selectedConv"
+                    [id]="selectedConv.publicUsername"
                     [name]="selectedConv.nickName"
                     [dp]="selectedConv.dp"
                     [isTyping] ="selectedConv.isTyping"
+                    [actions] ="chatBoxTopBarActions"
                     (rightPanelView) ="toggleRightPanel($event)"
                 ></app-chat-box-top-bar>
             </div>
@@ -177,16 +186,16 @@
                 </div>
             </div> -->
         </div>
-        <!-- side collapse column -->
-        <div #rightPanel [ngClass]="{'col-3 collapse collapse-horizontal p-0 border text-nowrap bg-white': true}" id="rightPanel" style="min-width: 15em;">
-            <app-right-panel
+        <!-- side collapse column style="min-width: 15em;"-->
+        <div #rightPanel [ngClass]="{'col-3 collapse collapse-horizontal p-0 border text-nowrap bg-white': true}" id="rightPanel" style="">
+            <app-right-panel class=""
                 [selectedConv] ="selectedConv"
                 [viewType]="rightPanelViewType"
                 (onSearchedMsgSelect)= "onSearchedMsgSelect($event)"
             ></app-right-panel>
         </div>
     </div>
-    <div *ngIf="!authService.isAuthenticated" class="mx-auto" style="width: 30%"> 
+    <div *ngIf="!authService.isAuthenticated" class="mx-auto" style="width: 26em"> 
         <app-login-page></app-login-page>
     </div>
       

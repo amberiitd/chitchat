@@ -1,6 +1,6 @@
 <div [class]="{'row': true, 'justify-content-end': toRight}">
     <div class="col-auto px-0 " style=" position: relative; max-width: 25em;"  (mouseenter)="hoverOnBody()" (mouseleave)="hoverOffBody()">
-        <div class="border shadow-sm p-0 px-1 py-1" [ngStyle]="!toRight?  { 'border-radius': '10px', 'border-top-left-radius': 0, 'background-color': bgColor} : { 'border-radius': '10px', 'border-top-right-radius': 0, 'background-color': bgColor }" >
+        <div class="shadow-sm p-0 px-1 py-1" [ngStyle]="!toRight?  { 'border-radius': '10px', 'border-top-left-radius': 0, 'background-color': bgColor} : { 'border-radius': '10px', 'border-top-right-radius': 0, 'background-color': bgColor }" >
             <!-- parent -->
             <div *ngIf="parent" class="px-2 mt-1 rounded-3 border-start border-info border-3 bg-light mb-1" style="opacity: 0.5;" (click) = "searchParentMessage()">
                 <p class="text-info mb-0" style="font-size: 90%;">{{parentSender}}</p>
@@ -37,7 +37,7 @@
             <button class="btn py-0 bg-light" type="button" id="messageDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="opacity: 0.5;" [hidden]="!showDropDown">
                 <i class="bi bi-chevron-down"></i>
             </button>
-            <ul class="dropdown-menu" aria-labelledby="messageDropdown">
+            <ul class="dropdown-menu shadow" aria-labelledby="messageDropdown">
                 <li><a class="dropdown-item" (click)= "actions[0].callback(timestamp)">Reply</a></li>
                 <li>
                     <a class="dropdown-item" (click)= "actions[1].callback(timestamp)">{{starred ? 'Unstar Message': 'Star Message'}}
@@ -47,13 +47,13 @@
             </ul>
         </div>
         <span [hidden]="!toRight" style="position: absolute; right: -8px; top: -8px;">
-            <svg viewBox="0 0 8 13" width="8" height="13" class="border-top" >
+            <svg viewBox="0 0 8 13" width="8" height="13" class="" >
                 <path opacity=".13" d="M5.188 1H0v11.193l6.467-8.625C7.526 2.156 6.958 1 5.188 1z"></path>
                 <path fill="#b0f7f7" d="M5.188 0H0v11.193l6.467-8.625C7.526 1.156 6.958 0 5.188 0z"></path>
             </svg>
         </span>
         <span  [hidden]="toRight" style="position: absolute; left: -8px; top: -8px; ">
-            <svg viewBox="0 0 8 13" width="8" height="13" class="border-top" >
+            <svg viewBox="0 0 8 13" width="8" height="13" class="" >
                 <path opacity=".13" fill="#0000000" d="M1.533 3.568L8 12.193V1H2.812C1.042 1 .474 2.156 1.533 3.568z"></path>
                 <path fill="#fff" d="M1.533 2.568L8 11.193V0H2.812C1.042 0 .474 1.156 1.533 2.568z"></path>
             </svg>  

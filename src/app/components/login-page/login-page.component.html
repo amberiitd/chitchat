@@ -1,9 +1,34 @@
-<div class="">
-    <div class="text-center">
-        <h2>Please Login!</h2>
-        <input class="form-control mb-3" type="text" placeholder="username" [(ngModel)]="username"/>
-        <input class="form-control mb-3" type="password" placeholder="password" [(ngModel)]="password"/>
-        <button class="btn form-control btn-primary" (click)="submitLogin()">Login</button>
-        {{msg}}
+<div class="bg-white shadow-lg p-5">
+    <div class="text-center mb-2">
+        <h2 class="mb-3">{{ view ===1 ?'Login' : 'Sign Up'}}</h2>
+        <div class="row flex-nowrap gx-0 btn-group mb-3 w-100" role="group" aria-label="Basic radio toggle button group">
+            <input type="radio" class="btn-check" name="btnradio" id="login" [value]="1" autocomplete="off" [(ngModel)]="view">
+            <label class="col-6 btn btn-outline-info" for="login">Login</label>
+          
+            <input type="radio" class="btn-check" name="btnradio" id="signup" [value]="2" autocomplete="off" [(ngModel)]="view">
+            <label class="col-6 btn btn-outline-info" for="signup">Signup</label>
+        </div>
+
+        <div *ngIf="view === 1">
+            <input class="form-control mb-3" type="text" placeholder="username" [(ngModel)]="username"/>
+            <input class="form-control mb-3" type="password" placeholder="password" [(ngModel)]="password1"/>
+        </div>
+
+        <div *ngIf="view === 2">
+            <input class="form-control mb-3" type="text" placeholder="first Name" [(ngModel)]="firstName"/>
+            <input class="form-control mb-3" type="text" placeholder="last Name" [(ngModel)]="lastName"/>
+            <input class="form-control mb-3" type="text" placeholder="username" [(ngModel)]="username"/>
+            <input class="form-control mb-3" type="text" placeholder="public username (sharable id)" [(ngModel)]="publicUsername"/>
+
+
+            <input class="form-control mb-3" type="password" placeholder="password" [(ngModel)]="password1"/>
+            <input class="form-control mb-3" type="password" placeholder="re-enter password" [(ngModel)]="password2"/>
+        </div>
+        <div>
+            <button class="btn form-control btn-info" (click)="submitLogin()">Submit</button>
+        </div> 
+    </div>
+    <div class="text-warning">
+        *{{msg}}
     </div>
 </div>

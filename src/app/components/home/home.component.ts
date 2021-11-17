@@ -2,6 +2,7 @@ import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
 import { AfterViewChecked, AfterViewInit, Component, ElementRef, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { isEmpty } from 'lodash';
 import { BsModalService } from 'ngx-bootstrap/modal';
+import { throwError } from 'rxjs';
 import { timestamp } from 'rxjs/operators';
 import { Action, ActionRequest } from 'src/app/model/action.model';
 import { UIAlert } from 'src/app/model/notification.model';
@@ -21,7 +22,6 @@ import { MessageService } from '../../service/message.service';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
-
   @ViewChild('scrollToEnd') private myScrollContainer: ElementRef;
   @ViewChild('rightPanel') private rightPanel: ElementRef;
   @ViewChild('alertModal')
@@ -34,6 +34,9 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
 
 
   public messageletActions : Array<Action> =[];
+  public convActions: Array<Action> = [];
+  public chatToolBarActions: Array<Action> = [];
+  public chatBoxTopBarActions: Array<Action> = [];
 
   public currentUser: User = defaultUser;
   public msgList: Array<InMessage>= [];
@@ -144,14 +147,27 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
     this.authService.getCurrentUser(
       user =>{
         this.currentUser = user;
+        this.refreshConnection();
       }
     )
     
-    this.refreshConnection();
 
     this.messageService.nextMessageSubject.subscribe(
       msg =>{
         const index = this.peopleList.findIndex(conv => conv.publicUsername === msg.from );
+        if (index < 0 && msg.type === 'message' ){
+          this.dataService.findPeople(msg.from, 
+            (data: PeopleDTO)=> {
+              const people: People= data as People;
+              people.messages =[msg];
+              people.lastMessage =msg;
+              people.unseenCount =1;
+              this.peopleList.push(people);
+              this.reOrderConv();
+              this.playNotifSound();
+            }
+          );
+        }
         if (index >= 0 ){
 
           switch (msg.type){
@@ -180,6 +196,8 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
               }else{
                 this.peopleList[index].unseenCount +=1;
               }
+
+              this.reOrderConv();
               
               break;
 
@@ -241,9 +259,119 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
           this.updateMessage("delete");
         }
       },
-    ]
+    ];
+
+    this.convActions = [
+      {
+        idx: 0,
+        name: 'Delete Chat',
+        callback: (data) =>{
+          this.deleteAction({publicUsername: data, targetType: 'chat'});
+        }
+      },
+      {
+        idx: 1,
+        name: 'Pin Chat',
+        callback: (data) =>{
+          const index = this.peopleList.findIndex(conv => conv.publicUsername == data);
+          const conv = this.peopleList[index];
+          if(conv.pinned > 0){
+            conv.pinned = 0
+          }else{
+            conv.pinned = this.getTimeNow();
+          }
+          this.dataService.updatePinned(conv.publicUsername, conv.pinned,  () => {})
+          this.reOrderConv();
+        }
+      },
+      {
+        idx: 2,
+        name: 'Mark as read',
+        callback: (data) =>{
+          const index = this.peopleList.findIndex( conv => conv.publicUsername ==  data);
+          const conv = this.peopleList[index];
+
+          if(conv.unseenCount > 0){
+            this.messageService.notify(
+              {
+                type: "msg_seen", 
+                from: conv.publicUsername, 
+                to: this.currentUser.publicUsername,
+                endTime: conv.lastMessage.timestamp
+              }
+            );
+            conv.unseenCount =0 ;
+          }else{
+            conv.unseenCount = 1;
+          }
+          
+        }
+      },
+    ];
+
+    this.chatToolBarActions =[
+      {
+        idx: 0,
+        name: 'Log out',
+        callback: (data) =>{
+          this.authService.logout(()=>{
+            this.currentUser = defaultUser;
+            this.messages =[]
+            this.peopleList =[]
+            this.contacts =[]
+            this.selectedConv = undefined;
+          });
+        }
+      },
+    ];
+
+    this.chatBoxTopBarActions =[
+      {
+        idx: 0,
+        name: 'Contact info',
+        callback: (data) =>{
+          
+        }
+      },
+      {
+        idx: 1,
+        name: 'Select messages',
+        callback: (data) =>{
+          
+        }
+      },
+      {
+        idx: 2,
+        name: 'Close chat',
+        callback: (data) =>{
+          this.removeConvSelectionProps();
+        }
+      },
+      {
+        idx: 3,
+        name: 'Clear messages',
+        callback: (data) =>{
+          this.deleteAction({publicUsername: data, targetType: 'messages'});
+        }
+      },
+      {
+        idx: 5,
+        name: 'Delete chat',
+        callback: (data) =>{
+          this.deleteAction({publicUsername: data, targetType: 'chat'});
+        }
+      },
+    ];
 
     this.messageletActions.forEach(action =>{
+      action.callback = action.callback.bind(this);
+    })
+
+    this.convActions.forEach(action =>{
+      action.callback = action.callback.bind(this);
+    })
+
+    this.chatToolBarActions.forEach(action =>{
       action.callback = action.callback.bind(this);
     })
   }
@@ -267,6 +395,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
               };
     
               this.peopleList.push(conv);
+              this.reOrderConv();
             }
           )
         });
@@ -322,6 +451,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
 
       // reconnect to selected conv messages
       this.messages = this.selectedConv.messages
+      this.reOrderConv();
       this.defaultScrollDown = true;
 
       this.newmsg = "";
@@ -392,42 +522,44 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
       this.selectedConv.style = {bg: 'azure'};
       this.messages = this.selectedConv.messages;
 
+      const postSelection = () => {
+
+        if(this.selectedConv.lastMessage){
+          this.messageService.notify(
+            {
+              type: "msg_seen", 
+              from: this.selectedConv.publicUsername, 
+              to: this.currentUser.publicUsername,
+              endTime: this.selectedConv.lastMessage.timestamp
+            }
+          );
+        }
+        
+        this.selectedConv.unseenCount = 0;
+        this.defaultScrollDown = true;
+      }
+
       if(!this.selectedConv.init){
         this.selectedConv.init = true;
         this.messageService.getMsgs( {from: this.selectedConv.publicUsername},
           (msgs: Array<InMessage>) =>{
             this.selectedConv.messages.push(...msgs);
-            this.messageService.notify(
-              {
-                type: "msg_seen", 
-                from: this.selectedConv.publicUsername, 
-                to: this.currentUser.publicUsername,
-                endTime: this.messages[this.messages.length-1].timestamp
-              }
-            );
-            this.selectedConv.unseenCount = 0;
-            this.defaultScrollDown = true;
+            postSelection();
           }
         ); 
       }else{
-        this.messageService.notify(
-          {
-            type: "msg_seen", 
-            from: this.selectedConv.publicUsername, 
-            to: this.currentUser.publicUsername,
-            endTime: this.messages[this.messages.length-1].timestamp
-          }
-        );
-        this.selectedConv.unseenCount = 0;
-        this.defaultScrollDown = true;
+        postSelection();
       }
     }
   }
 
   removeConvSelectionProps(){
-    this.selectedConv.style= {bg: 'inherit'};
-    this.selectedConv = undefined;
-    this.messages = []
+    if(this.selectedConv){
+      this.selectedConv.style= {bg: 'inherit'};
+      this.selectedConv = undefined;
+      this.messages = []
+    }
+
   }
 
   onContactSelect(contactId: any){
@@ -474,6 +606,10 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
   }
 
   onSearchedMsgSelect(pivotTime: number){
+    if(!this.selectedConv){
+      return;
+    }
+
     this.messageService.getMsgs(
       {from: this.selectedConv.publicUsername, pivotTime: pivotTime}, 
       (data: any) => {
@@ -649,5 +785,71 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
       });
 
     
+  }
+
+  deleteAction(data: {publicUsername: string, targetType: 'messages' | 'chat'  | 'contact'}){
+
+    const callback = (() => {
+      if(data.targetType === 'chat'){
+        const index = this.peopleList.findIndex(conv => conv.publicUsername === data.publicUsername);
+        this.removeConvSelectionProps();
+        this.peopleList.splice(index, 1);
+      }else if(data.targetType == 'messages'){
+        this.selectedConv.messages =[]
+        this.selectedConv.lastMessage = undefined;
+        this.messages = this.selectedConv.messages;
+      }
+      
+    }).bind(this);
+
+    const alert: UIAlert = {
+      actionName: 'Delete',
+      target: data.targetType,
+      fallback: ()=> {},
+      options: [
+        {
+          name: 'Delete' + data.targetType,
+          call: () => {
+            this.dataService.deleteTarget(
+              data,
+              ()=>{
+                this.notifService.notificationSubject.next({
+                  actionname: 'deleted',
+                  target: data.targetType,
+                  targetCount: 1
+                })
+                callback();
+              }
+            )
+          }
+        }
+      ]
+    };
+
+    alert.options.forEach(
+      option => {
+        option.call = option.call.bind(this);
+      }
+    )
+
+    this.alert = alert;
+    this.modalService.show(this.alertModal, {animated: false});
+  }
+
+  reOrderConv (){
+    this.peopleList.sort((a, b)=> {
+      if (b.pinned > 0 || a.pinned > 0){
+        return b.pinned - a.pinned;
+      }else{
+        if (!a.lastMessage){
+          return 1;
+        }else if (!b.lastMessage){
+          return -1;
+        }else{
+          return b.lastMessage.timestamp - a.lastMessage.timestamp;
+
+        }
+      }
+    })
   }
 }

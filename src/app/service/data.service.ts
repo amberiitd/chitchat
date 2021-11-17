@@ -153,4 +153,50 @@ export class DataService{
             res => {callback()}
         );   
     }
+
+    
+    deleteTarget(data: {publicUsername: string, targetType: any}, callback: () => void) {
+        const options= {
+            headers: {
+                'Authorization': "Basic "+ this.authService.getAuthToken()
+            }
+        }
+        this.http.post<any>(this.api + "/delete", data, options)
+        .pipe(
+            catchError(
+                (error: any) => {
+                    console.log(error);
+                    return throwError(error)
+                }
+            )
+        )
+        .subscribe(
+            res => {callback()}
+        );   
+    }
+
+    
+    updatePinned(publicUsername: string, value: number, callback: () => void) {
+        const options= {
+            headers: {
+                'Authorization': "Basic "+ this.authService.getAuthToken()
+            },
+            params: {
+                publicUsername: publicUsername,
+                stamp: value
+            }
+        }
+        this.http.post<any>(this.api + "/pin-conv", {}, options)
+        .pipe(
+            catchError(
+                (error: any) => {
+                    console.log(error);
+                    return throwError(error)
+                }
+            )
+        )
+        .subscribe(
+            res => {callback()}
+        );   
+    }
 }

@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import { Action } from 'src/app/model/action.model';
 import { defaultInMessage, InMessage } from 'src/app/model/message.model';
 import { AuthService } from 'src/app/service/auth.service';
 import { formatTime } from 'src/app/util/util-method';
@@ -28,7 +29,13 @@ export class ChatPeopleComponent implements OnInit, OnChanges {
   public viewType: 'conv' | 'contact' |'newContact' = 'conv';
 
   @Input()
+  public actions: ReadonlyArray<Action> =[];
+
+  @Input()
   public status: string = "";
+
+  @Input()
+  public pinned: number = -1;
 
   @Output()
   public onSelect = new EventEmitter<string>();

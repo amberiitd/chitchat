@@ -1,6 +1,6 @@
 export interface UINotification{
     actionname: string;
-    target: 'message' | 'chat'| 'contact';
+    target: 'message' | 'chat'| 'contact' | 'messages' | string;
     targetCount?: number;
     targetData?: any; 
     undo?: () => void; 
@@ -9,7 +9,7 @@ export interface UINotification{
 
 export interface UIAlert{
     actionName: string;
-    target: 'message' | 'chat' ;
+    target: 'message'|  'chat' | string;
     fallback: () => void,
     options: Array<{name: string, call: () => void}>;
     targetCount?: number;

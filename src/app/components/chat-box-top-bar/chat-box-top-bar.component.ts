@@ -1,4 +1,5 @@
 import { AfterViewChecked, AfterViewInit, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { Action } from 'src/app/model/action.model';
 import { TogglerService } from 'src/app/service/toggler.service';
 
 @Component({
@@ -22,6 +23,9 @@ export class ChatBoxTopBarComponent implements OnInit, AfterViewInit, AfterViewC
 
   @Input()
   public dp: Blob = new Blob();
+
+  @Input()
+  public actions : ReadonlyArray<Action> =[];
 
   @Output()
   public rightPanelView = new EventEmitter();

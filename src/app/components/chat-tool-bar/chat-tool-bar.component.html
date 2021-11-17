@@ -13,10 +13,8 @@
                 <button class="btn " type="button" id="chatToolDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="" >
                     <i class="bi bi-three-dots-vertical"></i>
                 </button>
-                <ul class="dropdown-menu" aria-labelledby="chatToolDropdown">
-                    <li><a class="dropdown-item" href="#">Action</a></li>
-                    <li><a class="dropdown-item" href="#">Another action</a></li>
-                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                <ul class="dropdown-menu shadow" aria-labelledby="chatToolDropdown" style="">
+                    <li *ngFor="let action of actions" (click)= "action.callback({})"><a class="dropdown-item">{{action.name}}</a></li>
                 </ul>
             </span>
             

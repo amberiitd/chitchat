@@ -14,6 +14,7 @@ export interface PeopleDTO{
     unseenCount: number;
     notViewedCount: number;
     status: string;
+    pinned: number;
 }
 
 export const defaultPeople: People = {
@@ -26,4 +27,5 @@ export const defaultPeople: People = {
     unseenCount: 0,
     notViewedCount: 0,
     status: "string",
+    pinned: -1
 }
