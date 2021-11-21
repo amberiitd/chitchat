@@ -29,7 +29,7 @@ export class MessageService {
         onSuccess: (data : any) => void,
         onDisconnect: (data: any) => void,
         ){
-        const socket = new SockJS("http://localhost:8080/chit-chat");
+        const socket = new SockJS(this.api+ "/chit-chat");
         this.stompClient = Stomp.over(socket);
 
         this.stompClient.connect({'Authorization': 'Basic '+ this.authService.getAuthToken()}, (frame: any) =>{
