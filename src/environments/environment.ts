@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  activeProfile: 'local',
+  activeProfile: 'dev',
   profiles: [
     {
       name: 'local',
