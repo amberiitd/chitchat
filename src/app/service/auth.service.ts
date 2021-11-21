@@ -2,6 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Subject, throwError } from "rxjs";
 import { catchError } from "rxjs/operators";
+import { environment } from "src/environments/environment";
 import { defaultUser, User } from "../model/User.model";
 
 @Injectable()
@@ -10,7 +11,7 @@ export class AuthService{
     public authSubject = new Subject<any>();
     public currentUser : User;
 
-    private api = "http://localhost:8080"
+    private api = environment.profiles.find(profile => profile.name === environment.activeProfile)?.api;
     private token: any ="";
     private users: any[] =[
         {

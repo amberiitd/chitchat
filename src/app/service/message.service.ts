@@ -5,6 +5,7 @@ import { isEmpty } from 'lodash';
 import { Subject, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import * as SockJS from 'sockjs-client';
+import { environment } from 'src/environments/environment';
 import { ActionRequest } from '../model/action.model';
 import { InMessage, MessageQuery, Notification, OutMessage } from '../model/message.model';
 import { People } from '../model/people.model';
@@ -14,7 +15,7 @@ import { AuthService } from './auth.service';
 export class MessageService {
 
     public isConnected = false;
-    private api = "http://localhost:8080";
+    private api = environment.profiles.find(profile => profile.name === environment.activeProfile)?.api;
     private stompClient: CompatClient;
 
     public nextMessageSubject = new Subject<InMessage>();

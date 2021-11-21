@@ -48,7 +48,7 @@
     </div>
 
     <div *ngIf="viewType === 'contact'" class="col-auto p-1 ms-auto" [hidden] ="!showOnHover">
-        <button class="btn " >
+        <button class="btn " (click)= "actions[0].callback(id)">
             <i class="bi bi-trash"></i>
         </button> 
     </div>

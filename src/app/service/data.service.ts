@@ -2,6 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { throwError } from "rxjs";
 import { catchError } from 'rxjs/operators'
+import { environment } from "src/environments/environment";
 import { People, PeopleDTO } from "../model/people.model";
 import { User } from "../model/User.model";
 import { AuthService } from "./auth.service";
@@ -9,7 +10,8 @@ import { AuthService } from "./auth.service";
 @Injectable()
 export class DataService{
 
-    private api: string = "http://localhost:8080";
+    private api = environment.profiles.find(profile => profile.name === environment.activeProfile)?.api;
+
 
     constructor(
         private readonly http: HttpClient,

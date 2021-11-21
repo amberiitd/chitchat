@@ -3,7 +3,18 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  activeProfile: 'local',
+  profiles: [
+    {
+      name: 'local',
+      api: 'http://localhost:8080'
+    },
+    {
+      name: 'dev',
+      api: 'http://35.188.2.89'
+    },
+  ]
 };
 
 /*

@@ -37,6 +37,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
   public convActions: Array<Action> = [];
   public chatToolBarActions: Array<Action> = [];
   public chatBoxTopBarActions: Array<Action> = [];
+  public chatContactActions:  Array<Action> = [];
 
   public currentUser: User = defaultUser;
   public msgList: Array<InMessage>= [];
@@ -362,6 +363,16 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
         }
       },
     ];
+
+    this.chatContactActions =[
+      {
+        idx: 0,
+        name: 'Delete Contact',
+        callback: (data) =>{
+          this.deleteAction({publicUsername: data, targetType: 'contact'});
+        }
+      }
+    ]
 
     this.messageletActions.forEach(action =>{
       action.callback = action.callback.bind(this);
@@ -794,10 +805,13 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
         const index = this.peopleList.findIndex(conv => conv.publicUsername === data.publicUsername);
         this.removeConvSelectionProps();
         this.peopleList.splice(index, 1);
-      }else if(data.targetType == 'messages'){
+      }else if(data.targetType === 'messages'){
         this.selectedConv.messages =[]
         this.selectedConv.lastMessage = undefined;
         this.messages = this.selectedConv.messages;
+      }else if(data.targetType === 'contact'){
+        this.contacts = this.contacts.filter(contact => contact.publicUsername !== data.publicUsername);
+        this.searchedContacts = this.contacts;
       }
       
     }).bind(this);
@@ -808,7 +822,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
       fallback: ()=> {},
       options: [
         {
-          name: 'Delete' + data.targetType,
+          name: 'Delete ' + data.targetType,
           call: () => {
             this.dataService.deleteTarget(
               data,
