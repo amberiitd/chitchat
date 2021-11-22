@@ -181,7 +181,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
               
               if (this.peopleList[index].init){
                 var insertAt =this.peopleList[index].messages.length;
-                while(this.peopleList[index].messages[insertAt-1].timestamp > msg.timestamp){
+                while(insertAt > 0 && this.peopleList[index].messages[insertAt-1].timestamp > msg.timestamp){
                   insertAt -=1;
                 }
                 this.peopleList[index].messages.splice(insertAt, 0, msg); // conv message always have last message if init= true
