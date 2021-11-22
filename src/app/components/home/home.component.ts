@@ -11,7 +11,7 @@ import { AuthService } from 'src/app/service/auth.service';
 import { DataService } from 'src/app/service/data.service';
 import { NotificationService } from 'src/app/service/notification.service';
 import { TogglerService } from 'src/app/service/toggler.service';
-import { formatTime } from 'src/app/util/util-method';
+import { formatTime, getTimeNow } from 'src/app/util/util-method';
 import { OutMessage, InMessage, defaultInMessage } from '../../model/message.model';
 import { defaultPeople, People, PeopleDTO } from '../../model/people.model';
 import { MessageService } from '../../service/message.service';
@@ -21,7 +21,7 @@ import { MessageService } from '../../service/message.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
+export class HomeComponent implements OnInit, AfterViewChecked {
   @ViewChild('scrollToEnd') private myScrollContainer: ElementRef;
   @ViewChild('rightPanel') private rightPanel: ElementRef;
   @ViewChild('alertModal')
@@ -40,7 +40,6 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
   public chatContactActions:  Array<Action> = [];
 
   public currentUser: User = defaultUser;
-  public msgList: Array<InMessage>= [];
   public newmsg: string = "";
   public defaultScrollDown = true;
 
@@ -50,7 +49,6 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
     bytes: Blob;
     audioCtx: AudioContext;
     audioBuffer: AudioBuffer | undefined;
-
   }
 
   public selectedConv: any;
@@ -67,6 +65,8 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
   public replyToMessage: InMessage | undefined;
   public replyToPeople: string | undefined;
   public addchatBoxClass:"chat-window1" | "chat-window2"  = "chat-window1";
+
+  public typingTimer: any;
 
   public newContact: {
     showInput: boolean;
@@ -104,17 +104,6 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
       }
     )
 
-    this.messageService.nextMessageSubject.subscribe(
-      msg =>{
-        this.msgList.push(msg);
-      }
-    )
-  }
-
-  ngAfterViewInit(): void {
-    // this.rightPanel.nativeElement.addEventListener('hide.bs.collapse', (e: any) =>{
-    //   e.preventDefault();
-    // })
   }
 
   ngAfterViewChecked(): void {
@@ -125,11 +114,6 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
   }
 
   init(){
-    // this.togglerService.scrollBottom.subscribe(
-    //   () => {
-    //     this.defaultScrollDown = true;
-    //   }
-    // )
     this.initActions();
 
     this.dataService.getNotifSound(
@@ -143,7 +127,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
         this.sound.audioCtx.decodeAudioData(await this.sound.bytes.arrayBuffer(), (input)=>{this.sound.audioBuffer = input});
          
       }
-    )
+    );
 
     this.authService.getCurrentUser(
       user =>{
@@ -152,91 +136,6 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
       }
     )
     
-
-    this.messageService.nextMessageSubject.subscribe(
-      msg =>{
-        const index = this.peopleList.findIndex(conv => conv.publicUsername === msg.from );
-        if (index < 0 && msg.type === 'message' ){
-          this.dataService.findPeople(msg.from, 
-            (data: PeopleDTO)=> {
-              const people: People= data as People;
-              people.messages =[msg];
-              people.lastMessage =msg;
-              people.unseenCount =1;
-              this.peopleList.push(people);
-              this.reOrderConv();
-              this.playNotifSound();
-            }
-          );
-        }
-        if (index >= 0 ){
-
-          switch (msg.type){
-            case 'message':
-              if (!this.peopleList[index].lastMessage ||
-                msg.timestamp > this.peopleList[index].lastMessage.timestamp ){
-                this.peopleList[index].lastMessage = msg;
-              }
-              this.playNotifSound();
-              
-              if (this.peopleList[index].init){
-                var insertAt =this.peopleList[index].messages.length;
-                while(insertAt > 0 && this.peopleList[index].messages[insertAt-1].timestamp > msg.timestamp){
-                  insertAt -=1;
-                }
-                this.peopleList[index].messages.splice(insertAt, 0, msg); // conv message always have last message if init= true
-    
-                if(this.selectedConv.publicUsername === this.peopleList[index].publicUsername
-                  && this.messages[this.messages.length -1].timestamp === this.selectedConv.lastMessage.timestamp){
-                  this.defaultScrollDown = true;
-
-                  this.messageService.notify(
-                    {
-                      type: "msg_seen", 
-                      from: this.selectedConv.publicUsername, 
-                      to: this.currentUser.publicUsername,
-                      endTime: this.messages[this.messages.length-1].timestamp
-                    }
-                  );
-                }else{
-                  this.peopleList[index].unseenCount +=1;
-                }
-              }else{
-                this.peopleList[index].unseenCount +=1;
-              }
-
-              this.reOrderConv();
-              
-              break;
-
-            case 'typing':
-              if(this.selectedConv && this.selectedConv.publicUsername === this.peopleList[index].publicUsername){
-                this.selectedConv.isTyping = true;
-                setTimeout(()=>{this.selectedConv.isTyping = false}, 1990);
-              }
-
-              break;
-
-            case 'viewNotif':
-              if(this.peopleList[index].init){
-                // for ui live change 
-                this.peopleList[index].messages.slice(this.messages.length - this.peopleList[index].notViewedCount).forEach(
-                  msg =>{
-                    msg.notViewed = false;
-                  }
-                )
-              }
-              this.peopleList[index].notViewedCount = 0;
-              break;
-
-            default:
-              break;
-          }
-          
-        }
-
-      }
-    )
   }
 
   initActions(){
@@ -283,7 +182,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
           if(conv.pinned > 0){
             conv.pinned = 0
           }else{
-            conv.pinned = this.getTimeNow();
+            conv.pinned = getTimeNow();
           }
           this.dataService.updatePinned(conv.publicUsername, conv.pinned,  () => {})
           this.reOrderConv();
@@ -391,6 +290,96 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
     })
   }
 
+  processNewMsg(msg: InMessage){
+    const index = this.peopleList.findIndex(conv => conv.publicUsername === msg.from );
+    if (index < 0 && msg.type === 'message' ){
+      this.dataService.findPeople(msg.from, 
+        (data: PeopleDTO)=> {
+          const people: People= {
+            ...data,
+            init: false,
+            messages : []
+          };
+          this.peopleList.push(people);
+          this.updateConvWithNewMsg(this.peopleList.length, msg)
+        }
+      );
+    }
+    else if (index >= 0 ){
+      this.updateConvWithNewMsg(index, msg);
+    }
+    
+  }
+
+  updateConvWithNewMsg(index: number, msg: InMessage){
+    switch (msg.type){
+      case 'message':
+        if (!this.peopleList[index].lastMessage ||
+          msg.timestamp > this.peopleList[index].lastMessage.timestamp ){
+          this.peopleList[index].lastMessage = msg;
+        }
+        this.playNotifSound();
+        
+        if (this.peopleList[index].init){
+          this.insertMsgIntoConv(index, msg);
+          
+          if(this.selectedConv.publicUsername === this.peopleList[index].publicUsername
+            && this.messages[this.messages.length -1].timestamp === this.selectedConv.lastMessage.timestamp){
+            this.defaultScrollDown = true;
+            this.messageService.notify(
+              {
+                type: "msg_seen", 
+                from: this.selectedConv.publicUsername, 
+                to: this.currentUser.publicUsername,
+                endTime: this.messages[this.messages.length-1].timestamp
+              }
+            );
+          }else{
+            this.peopleList[index].unseenCount +=1;
+          }
+        }else{
+          this.peopleList[index].unseenCount +=1;
+        }
+
+        this.reOrderConv();
+        
+        break;
+
+      case 'typing':
+        if(this.selectedConv && this.selectedConv.publicUsername === this.peopleList[index].publicUsername){
+          this.selectedConv.isTyping = true;
+          clearTimeout(this.typingTimer);
+          this.typingTimer = setTimeout(()=>{this.selectedConv.isTyping = false}, 3000);
+        }
+
+        break;
+
+      case 'viewNotif':
+        if(this.peopleList[index].init){
+          // for ui live change 
+          this.peopleList[index].messages.slice(this.messages.length - this.peopleList[index].notViewedCount).forEach(
+            msg =>{
+              msg.notViewed = false;
+            }
+          )
+        }
+        this.peopleList[index].notViewedCount = 0;
+        break;
+
+      default:
+        break;
+    }
+   
+  }
+
+  insertMsgIntoConv(index: number, msg: InMessage){
+    var insertAt =this.peopleList[index].messages.length;
+    while(insertAt > 0 && this.peopleList[index].messages[insertAt-1].timestamp > msg.timestamp){
+      insertAt -=1;
+    }
+    this.peopleList[index].messages.splice(insertAt, 0, msg); // conv message always have last message if init= true
+  }
+
   disconnect(){
     this.messageService.disconnect();
   }
@@ -417,6 +406,9 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
       },
       input => {
         this.connectionStatus = 'disconnected';
+      },
+      (msg: InMessage)=>{
+        this.processNewMsg(msg);
       }
     );
   }
@@ -439,7 +431,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
         from: this.currentUser.publicUsername,
         text: data.msgText?? "",
         notViewed: true,
-        timestamp: this.getTimeNow()
+        timestamp: getTimeNow()
       }
 
       if (this.replyToMessage){
@@ -475,18 +467,8 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
     }
   }
 
-  getTimeNow(){
-    var currentdate = new Date(); 
-     return currentdate.getTime();
-    // return currentdate.getDate() + "/"
-    //                 + (currentdate.getMonth()+1)  + "/" 
-    //                 + currentdate.getFullYear() + " @ "  
-    //                 + currentdate.getHours() + ":"  
-    //                 + currentdate.getMinutes() + ":" 
-    //                 + currentdate.getSeconds();
-  }
   scrollHandler(event: any){
-    if (this.myScrollContainer.nativeElement.scrollHeight === this.myScrollContainer.nativeElement.clientHeight + this.myScrollContainer.nativeElement.scrollTop){
+    if (this.myScrollContainer.nativeElement.scrollHeight === this.myScrollContainer.nativeElement.clientHeight + this.myScrollContainer.nativeElement.scrollTop){ // reaches bottom
       if ( this.messages[this.messages.length -1].timestamp < this.selectedConv.lastMessage.timestamp){
         this.messageService.getMsgs(
           {from: this.selectedConv.publicUsername, startTime: this.messages[this.messages.length-1].timestamp}, 
@@ -511,7 +493,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
         
       }
       
-    }else if(this.myScrollContainer.nativeElement.scrollTop === 0){
+    }else if(this.myScrollContainer.nativeElement.scrollTop === 0){ // reaches top
       this.messageService.getMsgs(
         {from: this.selectedConv.publicUsername, endTime: this.messages[0].timestamp}, 
         (data: any) => {
