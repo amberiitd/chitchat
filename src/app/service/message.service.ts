@@ -112,7 +112,7 @@ export class MessageService {
                 this.send(this.messageBuffer[0]);
             }
         }else{
-            this.send(this.messageBuffer[0]);
+            this.send(msg);
         }
         
     }
