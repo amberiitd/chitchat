@@ -173,7 +173,8 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
 
           switch (msg.type){
             case 'message':
-              if (msg.timestamp > this.peopleList[index].lastMessage.timestamp){
+              if (!this.peopleList[index].lastMessage ||
+                msg.timestamp > this.peopleList[index].lastMessage.timestamp ){
                 this.peopleList[index].lastMessage = msg;
               }
               this.playNotifSound();
