@@ -107,7 +107,7 @@ export class MessageService {
 
     sendToUser( msg: OutMessage){
         if (msg.type === 'message'){
-            this.messageBuffer.push(msg);
+            this.messageBuffer.splice(0, 0, msg);
             if (this.messageBuffer.length == 1){
                 this.send(this.messageBuffer[0]);
             }
