@@ -4,12 +4,13 @@ export interface OutMessage extends InMessage{
 }
 
 export interface InMessage{
-    type: 'message' | 'typing' | 'viewNotif';
+    type: 'message' | 'typing' | 'viewNotif' | 'msg_sent';
     from: string;
     text: string;
     notViewed: boolean;
     deleted: boolean;
-    starred: boolean,
+    starred: boolean;
+    status: 'sending' | 'sent' | 'recieved' | 'viewed';
     timestamp: number;
     parentId?: number;
     parent?: InMessage; // timestamp for now 
@@ -40,4 +41,5 @@ export const defaultInMessage: InMessage = {
     deleted: false,
     starred: false,
     timestamp: 0,
+    status: 'sending'
 }

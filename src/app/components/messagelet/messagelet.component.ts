@@ -34,6 +34,9 @@ export class MessageletComponent implements OnInit, OnChanges {
   public starred = false;
 
   @Input()
+  public status : any;
+
+  @Input()
   public parent: InMessage | undefined;
 
   @Input()

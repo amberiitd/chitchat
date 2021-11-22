@@ -24,7 +24,10 @@
                     </span>
                     <span>{{formattedTime}}</span> 
 
-                    <span *ngIf="toRight && !viewed">
+                    <span *ngIf="toRight && status=== 'sending'">
+                        <i class="bi bi-clock"></i>
+                    </span>
+                    <span *ngIf="toRight && status === 'sent' && !viewed">
                         <i class="bi bi-check"></i>
                     </span>
                     <span *ngIf="toRight && viewed">

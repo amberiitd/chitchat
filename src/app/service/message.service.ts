@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { CompatClient, Stomp } from '@stomp/stompjs';
-import { isEmpty } from 'lodash';
+import { isEmpty, map } from 'lodash';
 import { Subject, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import * as SockJS from 'sockjs-client';
@@ -17,6 +17,10 @@ export class MessageService {
     public isConnected = false;
     private api = environment.profiles.find(profile => profile.name === environment.activeProfile)?.api;
     private stompClient: CompatClient;
+    private messageBuffer: Array<OutMessage> = [];
+    private sendingMsg: OutMessage;
+    private sendingTimer: any;
+
 
     public nextMessageSubject = new Subject<InMessage>();
 
@@ -47,7 +51,21 @@ export class MessageService {
 
             this.stompClient.subscribe('/user/queue/msg', (message)=> {
                 console.log(message);
-                this.nextMessageSubject.next(JSON.parse(message.body) as InMessage);
+                const msg= JSON.parse(message.body) as InMessage;
+                if (msg.type === 'msg_sent'){
+                    const msgOnTop = this.messageBuffer.pop();
+                    if(msgOnTop && msgOnTop.timestamp === msg.timestamp){
+                        msgOnTop.status = 'sent';
+                    }else if(msgOnTop){
+                        this.messageBuffer.push(msgOnTop);
+                    }
+
+                    if(this.messageBuffer.length > 0){
+                        this.send(this.messageBuffer[this.messageBuffer.length -1])
+                    }
+                }else {
+                    this.nextMessageSubject.next(msg);
+                }
             });
 
             this.isConnected = true;
@@ -67,12 +85,36 @@ export class MessageService {
     }
 
     send(msg: OutMessage){
-        console.log(msg)
-        this.stompClient.send("/app/broadcast", {}, JSON.stringify(msg))
+        if(msg.type == 'message'){
+            clearTimeout(this.sendingTimer);
+            this.sendingMsg = msg;
+            this.sendingTimer = setTimeout(
+                ()=> {
+                    if (this.messageBuffer.length > 0 && 
+                        this.sendingMsg.timestamp === this.messageBuffer[this.messageBuffer.length -1].timestamp){
+                        this.send(msg)
+                    }
+    
+                    return;
+                },
+                5000
+            );
+        }
+        
+        this.stompClient.send(`/app/monocast`, {}, JSON.stringify(msg));
+
     }
 
     sendToUser( msg: OutMessage){
-        this.stompClient.send(`/app/monocast`, {}, JSON.stringify(msg))
+        if (msg.type === 'message'){
+            this.messageBuffer.push(msg);
+            if (this.messageBuffer.length == 1){
+                this.send(this.messageBuffer[0]);
+            }
+        }else{
+            this.send(this.messageBuffer[0]);
+        }
+        
     }
 
     getMsgs(query: MessageQuery, callBack: (msgs: InMessage[]) => void) {
@@ -83,12 +125,17 @@ export class MessageService {
         }
         this.http.post<Array<InMessage>>(this.api +"/msgs",query, options)
         .pipe(
+            
             catchError(error =>{
                 console.log(error);
                 return throwError(error);
             })
         )
         .subscribe( res =>{
+            res= map(res, (msg)=> {
+                msg.status ="sent";
+                return msg;
+            });
             callBack(res);
         })
     }

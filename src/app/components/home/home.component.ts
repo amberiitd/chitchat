@@ -173,11 +173,17 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
 
           switch (msg.type){
             case 'message':
-              this.peopleList[index].lastMessage = msg;
+              if (msg.timestamp > this.peopleList[index].lastMessage.timestamp){
+                this.peopleList[index].lastMessage = msg;
+              }
               this.playNotifSound();
               
               if (this.peopleList[index].init){
-                this.peopleList[index].messages.push(msg); // conv message always have last message if init= true
+                var insertAt =this.peopleList[index].messages.length;
+                while(this.peopleList[index].messages[insertAt-1].timestamp > msg.timestamp){
+                  insertAt -=1;
+                }
+                this.peopleList[index].messages.splice(insertAt, 0, msg); // conv message always have last message if init= true
     
                 if(this.selectedConv.publicUsername === this.peopleList[index].publicUsername
                   && this.messages[this.messages.length -1].timestamp === this.selectedConv.lastMessage.timestamp){
@@ -211,18 +217,15 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
               break;
 
             case 'viewNotif':
-              if(this.selectedConv){
+              if(this.peopleList[index].init){
                 // for ui live change 
-                this.messages.slice(this.messages.length - this.selectedConv.notViewedCount).forEach(
+                this.peopleList[index].messages.slice(this.messages.length - this.peopleList[index].notViewedCount).forEach(
                   msg =>{
                     msg.notViewed = false;
                   }
                 )
-              }else{
-                this.peopleList[index].notViewedCount = 0;
               }
-              
-
+              this.peopleList[index].notViewedCount = 0;
               break;
 
             default:
@@ -455,7 +458,7 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterViewInit {
         this.peopleList.splice(0, 0, this.selectedConv);
         this.dataService.saveConv(this.selectedConv.publicUsername, () =>{});
       }
-      this.selectedConv.messages.push(inMsg);
+      this.selectedConv.messages.push(outMsg);
       this.selectedConv.notViewedCount+=1;
       this.selectedConv.lastMessage = inMsg;
       this.messageService.sendToUser(outMsg);
