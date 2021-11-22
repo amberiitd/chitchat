@@ -32,6 +32,7 @@ export class MessageService {
     connect(
         onSuccess: (data : any) => void,
         onDisconnect: (data: any) => void,
+        subscriptionCallback: (data: any) => void
         ){
         const socket = new SockJS(this.api+ "/chit-chat");
         this.stompClient = Stomp.over(socket);
@@ -64,7 +65,7 @@ export class MessageService {
                         this.send(this.messageBuffer[this.messageBuffer.length -1])
                     }
                 }else {
-                    this.nextMessageSubject.next(msg);
+                    subscriptionCallback(msg);
                 }
             });
 

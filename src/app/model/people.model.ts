@@ -20,12 +20,12 @@ export interface PeopleDTO{
 export const defaultPeople: People = {
     init: false,
     messages: [],
-    publicUsername: "string",
-    nickName: "string",
+    publicUsername: "",
+    nickName: "",
     dp: new Blob(),
     lastMessage: defaultInMessage,
     unseenCount: 0,
     notViewedCount: 0,
-    status: "string",
+    status: "",
     pinned: -1
 }
