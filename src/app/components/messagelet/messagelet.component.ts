@@ -40,6 +40,9 @@ export class MessageletComponent implements OnInit, OnChanges {
   public parent: InMessage | undefined;
 
   @Input()
+  public prevSender: string ='';
+
+  @Input()
   public convUser: People;
 
   @Input()

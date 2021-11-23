@@ -150,17 +150,18 @@
             </div>
             <!-- message window -->
             <div #scrollToEnd *ngIf="selectedConv" [class]="'px-5 '+ addchatBoxClass" style="height: 100%; overflow-y: auto; background-color: azure; " (scroll)="scrollHandler($event)">
-                <div class="row gx-0 mb-2" *ngFor="let message of messages" style="height: max-content;" style="margin-bottom: 0;" (dblclick)= "replyTo(message.timestamp)">
+                <div class="row gx-0 mb-2" *ngFor="let index of messages.keys()" style="height: max-content;" style="margin-bottom: 0;" (dblclick)= "replyTo(messages[index].timestamp)">
                     <app-messagelet 
-                        [text]="message.text"
-                        [from]="message.from"
-                        [timestamp]="message.timestamp"
-                        [toRight]="message.from === currentUser.publicUsername"
-                        [viewed]="!message.notViewed"
-                        [deleted]="message.deleted"
-                        [starred]="message.starred"
-                        [status]="message.status"
-                        [parent]= "message.parent"
+                        [text]="messages[index].text"
+                        [from]="messages[index].from"
+                        [timestamp]="messages[index].timestamp"
+                        [toRight]="messages[index].from === currentUser.publicUsername"
+                        [viewed]="!messages[index].notViewed"
+                        [deleted]="messages[index].deleted"
+                        [starred]="messages[index].starred"
+                        [status]="messages[index].status"
+                        [parent]= "messages[index].parent"
+                        [prevSender] = "index -1 >=0 ? messages[index-1].from: ''"
                         [actions]="messageletActions"
                         [convUser]="selectedConv"
                         (lookParent) ="onSearchedMsgSelect($event)"
