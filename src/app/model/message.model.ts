@@ -1,6 +1,7 @@
 
 export interface OutMessage extends InMessage{
     to: string;
+    poll: number;
 }
 
 export interface InMessage{
