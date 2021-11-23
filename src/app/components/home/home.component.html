@@ -150,7 +150,7 @@
             </div>
             <!-- message window -->
             <div #scrollToEnd *ngIf="selectedConv" [class]="'px-5 '+ addchatBoxClass" style="height: 100%; overflow-y: auto; background-color: azure; " (scroll)="scrollHandler($event)">
-                <div class="row gx-0 mb-2" *ngFor="let index of messages.keys()" style="height: max-content;" style="margin-bottom: 0;" (dblclick)= "replyTo(messages[index].timestamp)">
+                <div class="row gx-0 mb-2" *ngFor="let index of messageKeys" style="height: max-content;" style="margin-bottom: 0;" (dblclick)= "replyTo(messages[index].timestamp)">
                     <app-messagelet 
                         [text]="messages[index].text"
                         [from]="messages[index].from"

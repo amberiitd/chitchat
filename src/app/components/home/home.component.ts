@@ -1,5 +1,5 @@
 import { THIS_EXPR } from '@angular/compiler/src/output/output_ast';
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
+import { AfterContentChecked, AfterViewChecked, AfterViewInit, Component, ElementRef, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { isEmpty } from 'lodash';
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { throwError } from 'rxjs';
@@ -21,7 +21,7 @@ import { MessageService } from '../../service/message.service';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit, AfterViewChecked {
+export class HomeComponent implements OnInit, AfterViewChecked, AfterContentChecked {
   @ViewChild('scrollToEnd') private myScrollContainer: ElementRef;
   @ViewChild('rightPanel') private rightPanel: ElementRef;
   @ViewChild('alertModal')
@@ -58,6 +58,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
   public searchedContacts: Array<PeopleDTO> = [];
 
   public messages: Array<InMessage> = [];
+  public messageKeys: any =[];
   public selectedMessageStamps: Array<number> =[];
   public msgSearchResult: Array<InMessage> = [];
   public rightPanelViewType: 'searchChat' | 'userPref' = 'searchChat';
@@ -104,6 +105,11 @@ export class HomeComponent implements OnInit, AfterViewChecked {
       }
     )
 
+  }
+
+  
+  ngAfterContentChecked(): void {
+    this.messageKeys = this.messages.keys();
   }
 
   ngAfterViewChecked(): void {
