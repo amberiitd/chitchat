@@ -93,7 +93,8 @@ export class MessageService {
                 ()=> {
                     if (this.messageBuffer.length > 0 && 
                         this.sendingMsg.timestamp === this.messageBuffer[this.messageBuffer.length -1].timestamp){
-                        this.send(msg)
+                        this.sendingMsg.poll+=1;
+                        this.send(this.sendingMsg)
                     }
     
                     return;

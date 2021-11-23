@@ -301,7 +301,7 @@ export class HomeComponent implements OnInit, AfterViewChecked {
             messages : []
           };
           this.peopleList.push(people);
-          this.updateConvWithNewMsg(this.peopleList.length, msg)
+          this.updateConvWithNewMsg(this.peopleList.length-1, msg)
         }
       );
     }
@@ -407,10 +407,8 @@ export class HomeComponent implements OnInit, AfterViewChecked {
       input => {
         this.connectionStatus = 'disconnected';
       },
-      (msg: InMessage)=>{
-        this.processNewMsg(msg);
-      }
-    );
+      this.processNewMsg.bind(this)
+    )
   }
 
   sendToUser(data : {type: any, msgText?: string}){
@@ -419,7 +417,8 @@ export class HomeComponent implements OnInit, AfterViewChecked {
         ...defaultInMessage,
         type: "typing",
         to: this.selectedConv.publicUsername,
-        from: this.currentUser.publicUsername
+        from: this.currentUser.publicUsername,
+        poll: 0
       }
 
       this.messageService.sendToUser(outMsg);
@@ -441,7 +440,8 @@ export class HomeComponent implements OnInit, AfterViewChecked {
 
       const outMsg: OutMessage ={
         ...inMsg,
-        to: this.selectedConv.publicUsername
+        to: this.selectedConv.publicUsername,
+        poll: 1
       }
 
       if(!this.selectedConv.messages){
@@ -469,7 +469,8 @@ export class HomeComponent implements OnInit, AfterViewChecked {
 
   scrollHandler(event: any){
     if (this.myScrollContainer.nativeElement.scrollHeight === this.myScrollContainer.nativeElement.clientHeight + this.myScrollContainer.nativeElement.scrollTop){ // reaches bottom
-      if ( this.messages[this.messages.length -1].timestamp < this.selectedConv.lastMessage.timestamp){
+      if ( this.messages.length > 0 &&
+         this.messages[this.messages.length -1].timestamp < this.selectedConv.lastMessage.timestamp){
         this.messageService.getMsgs(
           {from: this.selectedConv.publicUsername, startTime: this.messages[this.messages.length-1].timestamp}, 
           (data: any[]) => {
