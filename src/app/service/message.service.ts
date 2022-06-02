@@ -92,7 +92,7 @@ export class MessageService {
             this.sendingTimer = setTimeout(
                 ()=> {
                     if (this.messageBuffer.length > 0 && 
-                        this.sendingMsg.timestamp === this.messageBuffer[this.messageBuffer.length -1].timestamp){
+                        this.sendingMsg.timestamp === this.messageBuffer[this.messageBuffer.length -1].timestamp && this.sendingMsg.poll < 3){
                         this.sendingMsg.poll+=1;
                         this.send(this.sendingMsg)
                     }

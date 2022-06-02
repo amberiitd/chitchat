@@ -104,6 +104,7 @@
                             <div class="row gx-0 mb-1 bg-light mx-0 px-2">
                                 <app-search-bar class=""
                                 [placeholder] ="'Search new chat'"
+                                (onTextChange) = "onConvSearch($event)"
                                 ></app-search-bar>
                             </div>
                             <!-- <div *ngIf="connectionStatus === 'connected'" class="row gx-0 mb-1 bg-light mx-0 text-center py-auto">

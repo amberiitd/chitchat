@@ -601,12 +601,12 @@ export class HomeComponent implements OnInit, AfterViewChecked, AfterContentChec
   }
 
   onConvSearch(text: string){
-    if(text === ''){
-      this.searchedContacts = [...this.contacts];
-    }else{
-      this.searchedContacts = this.contacts.filter(contact => contact.nickName.toLocaleLowerCase().includes(text.toLocaleLowerCase()))
+    // if(text === ''){
+    //   this.searchedConvList = [...this.peopleList];
+    // }else{
+    //   this.searchedConvList = this.peopleList.filter(contact => contact.nickName.toLocaleLowerCase().includes(text.toLocaleLowerCase()))
     
-    }
+    // }
   }
 
   onSearchedMsgSelect(pivotTime: number){
